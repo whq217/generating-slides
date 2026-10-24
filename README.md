@@ -114,7 +114,9 @@ generating-slides/
 │   ├── gen_patches.py          # 改基座 / 改样本后重算 patches.json
 │   ├── _base/                  # 无法由基座派生的独立稿（截断版 bad-scan-base-empty）
 │   └── expected.json           # 每份负样本的期望（退出码 + 输出须含关键词），verify-all 逐条比对
-├── LICENSE                     # MIT 正本 + 上游与第三方署名
+├── LICENSE                     # MIT 正本（保持标准文本，便于 GitHub 正确识别）
+├── NOTICE                      # 署名与第三方声明：上游范围、本包原创、nuwa-skill、v1 的 Reveal.js
+├── .gitattributes              # 换行锁 LF——机验依赖逐字节 sha256
 └── .gitignore
 ```
 
@@ -191,7 +193,7 @@ v1（Reveal.js 1200×700 + 19 主题 + 30 布局）已于 2026-10-20 移出本�
 
 ## 许可证
 
-MIT License。法律正本见 [LICENSE](LICENSE)（含上游 Frontend Slides 与女娲·Skill造人术的第三方声明）；正文口径见 [SKILL.md](SKILL.md) 文末《来源与许可》。
+MIT License。法律正本见 [LICENSE](LICENSE)；署名范围与第三方声明见 [NOTICE](NOTICE)（上游 Frontend Slides 取自哪些部分、本包原创清单、nuwa-skill 引用范围、v1 的 Reveal.js 声明）；正文口径见 [SKILL.md](SKILL.md) 文末《来源与许可》。
 
 ---
 

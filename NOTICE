@@ -1,0 +1,48 @@
+# NOTICE
+
+This repository is distributed under the MIT License. The binding license text is in
+[LICENSE](LICENSE). This file records attribution only — it does not modify the license.
+
+## Upstream — Frontend Slides
+
+This project is a derivative work (二次开发) of
+[Frontend Slides](https://github.com/zarazhangrui/frontend-slides) by Zara Zhang,
+licensed under the MIT License, Copyright (c) 2025 Zara Zhang.
+
+It is **not** an original work. In accordance with the MIT License, the upstream
+copyright notice and permission notice are retained in [LICENSE](LICENSE).
+
+What came from upstream: a subset of the style presets (color palettes and font pairings)
+and `scripts/extract-pptx.py`.
+
+## Original work in this repository
+
+Copyright (c) 2026 Hongqing W (published as 庆哥聊AI), released under the same MIT License:
+
+- the chassis-v2 fixed-stage layout engine (`assets/chassis-v2.html` and its sources)
+- the three-layer layout constraints: fill ratio → type scale → visual order
+- the focal-emphasis judgment layer
+- the seven-stage guided workflow and slot decision tree
+- the machine-verification pipeline (`verify-all`, `verify-consistency`, `check-deck`,
+  `measure-layout`, `crowd-probe`)
+- the remaining style presets, decoration vocabulary, and diagram recipes
+
+## Third party — 女娲·Skill造人术 (nuwa-skill)
+
+Stage 3 (content optimization) references the "Steve Jobs perspective" framing from
+[女娲·Skill造人术 (nuwa-skill)](https://github.com/alchaincyf/nuwa-skill),
+licensed under the MIT License.
+
+No source code from that project is redistributed here. Only the analytical framing is
+referenced, with attribution retained in
+[SKILL.md](SKILL.md) (*Sources & License*) and in the README acknowledgements.
+
+## Previous major version
+
+v1 of this project was built on [Reveal.js](https://revealjs.com/) (MIT License,
+Copyright (c) 2011-2024 Hakim El Hattab, https://hakim.se). Reveal.js is **not** bundled
+or required by the current version — v2 has zero runtime dependencies.
+
+The complete v1 source is archived in the tag
+[v1.0-revealjs](https://github.com/whq217/generating-slides/tree/v1.0-revealjs);
+the Reveal.js MIT notice applies to that tree only.

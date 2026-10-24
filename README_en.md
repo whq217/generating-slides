@@ -117,7 +117,8 @@ generating-slides/
 │   ├── gen_patches.py          # Recompute patches.json after changing the base or a fixture
 │   ├── _base/                  # Standalone fixtures that cannot derive from the base
 │   └── expected.json           # Expected exit code and keywords per fixture
-├── LICENSE                     # MIT text + upstream and third-party notices
+├── LICENSE                     # MIT text — kept canonical so GitHub detects it
+├── NOTICE                      # Attribution: upstream scope, original work, nuwa-skill, v1 Reveal.js
 ├── .gitattributes              # LF pinned — the verification chain depends on it
 └── .gitignore
 ```
@@ -157,7 +158,7 @@ Built on [Frontend Slides](https://github.com/zarazhangrui/frontend-slides) by @
 
 ## License
 
-MIT. The binding text is in [LICENSE](LICENSE), which carries the upstream Frontend Slides notice and the third-party nuwa-skill notice; the in-document statement is in the *Sources & License* section at the end of [SKILL.md](SKILL.md).
+MIT. The binding text is in [LICENSE](LICENSE); attribution scope and third-party notices are in [NOTICE](NOTICE) — which parts came from upstream Frontend Slides, what is original to this package, the extent of the nuwa-skill reference, and the Reveal.js notice for the archived v1. The in-document statement is in *Sources & License* at the end of [SKILL.md](SKILL.md).
 
 ---
 
