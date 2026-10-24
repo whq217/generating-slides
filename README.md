@@ -117,7 +117,9 @@ generating-slides/
 ├── LICENSE                     # MIT 正本（保持标准文本，便于 GitHub 正确识别）
 ├── NOTICE                      # 署名与第三方声明：上游范围、本包原创、nuwa-skill、v1 的 Reveal.js
 ├── .gitattributes              # 换行锁 LF——机验依赖逐字节 sha256
-└── .gitignore
+├── .gitignore
+└── tools/
+    └── build_platform_pkg.py   # 发布辅助：从本仓库单向派生技能市场包（不进平台包）
 ```
 
 ## 机验
@@ -158,6 +160,8 @@ v1（Reveal.js 1200×700 + 19 主题 + 30 布局）已于 2026-10-20 移出本�
 > 两版不兼容：v1 依赖 Reveal.js、6 阶段流程、`name: slides`；v2 零外部依赖、7 阶段、`name: generating-slides`。
 
 ## 更新记录
+
+- **2026-10-24（五）** — ①**确立单一真源**：本仓库是唯一真源，技能市场包由 `tools/build_platform_pkg.py` 单向派生（剥掉 LICENSE / NOTICE / .gitattributes / .gitignore / README_en.md / tools，并按渠道重写「安装」「许可证」两节）。此前两份手工维护已出现漂移——平台版 README 键盘表仍列着已删除的 **N 键提词面板**，与同一文件下方「移除 N 键」的记录自相矛盾。②**清掉 N 键残留**：派生脚本的内置体检抓到 4 处，已修——`README` 键盘表删 N 行、S 键改「备注卡提词」；`references/iterative-edit.md` 三处（`E/D/S/N/P` 改 `E/D/S/P`、「提词面板」检查项改「备注卡」、装配块注释去掉「提词」）；`references/speaker-mode.md` 备注卡说明改「刷新备注卡」。③派生脚本自带 6 项体检（专属文件零残留 / 相对链接零失效 / 无死引用 / 无旧功能说明 / 目录树不含 tools / SKILL.md 承担 MIT 声明），不通过即拒绝出包。验证：派生包 43 文件与线上 1.1.1 逐文件比对仅 3 个文件有差异且全为上述修复；`verify-all` 54/54 PASS；发布闸脱敏 0 命中。
 
 - **2026-10-24（四）** — ①**去维护史化**：SKILL.md 正文 17 处内联批注（"某日立 / 某日拍板 / 某日移除"类版本账）剥离，只留行为理由，日期账迁到本节末尾清单——这些是给人看的维护记录，不该占 agent 运行时上下文。②**补回署名**：1.0.0 有、1.1.0 漏掉的「女娲·Skill造人术」MIT 出处声明（SKILL.md《来源与许可》+ 上方致谢）已恢复，按本包自家署名纪律不得倒退。③**samples 补丁化**：25 份负样本原为 1089 行底盘全文副本、仅注入一处缺陷，改由基座 + `patches.json` 现场生成（逐份 sha256 自证），目录从 2.6 MB 降到 784 KB，打包后减约七成。验证：verify-all 54/54 PASS（负样本经现场生成后逐条比对，与原文逐字节一致）。
 

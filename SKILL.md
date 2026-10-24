@@ -2,7 +2,7 @@
 name: generating-slides
 slug: generating-slides
 displayName: 网页幻灯片制作专家
-version: 1.1.1
+version: 1.1.2
 author: 公众号「庆哥聊AI」
 license: MIT
 summary: "说一句话或丢一份材料，出可直接放映的网页幻灯片——单文件 HTML、七步引导、三层排版硬约束、交付前自动体检。"

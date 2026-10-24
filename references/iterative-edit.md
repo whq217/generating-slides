@@ -71,13 +71,13 @@ L3 强制规则（必须全部执行）：
 ```
 回归验证项（每次修改后必检，指纹对齐 chassis-v2 底盘）：
 □ 翻页核心           — grep "function go(n)" + grep "function paint()"（core.js 共享变量）
-□ 键盘/点击翻页      — grep "addEventListener('keydown'" + grep "addEventListener('click'"（E/D/S/N/P 各键分发在位；底盘无滚轮通道，wheel 零命中属正常——2026-10-22 改后检实测）
+□ 键盘/点击翻页      — grep "addEventListener('keydown'" + grep "addEventListener('click'"（E/D/S/P 各键分发在位；底盘无滚轮通道，wheel 零命中属正常——2026-10-22 改后检实测）
 □ 入场动画           — grep "\.rv" + grep "var(--d"（.rv 类 + 延迟编排两件都在）
 □ 数字滚动           — grep "function rollNums"（翻页重播在 go 内：grep "rollNums(slides[cur])"）
 □ 画笔工具           — grep "function togglePen" + grep "function clearPen" + grep "penCanvas.classList.toggle"（翻页自动清：go 内 clearPen 调用）
 □ 编辑功能           — grep "function toggleEdit" + grep "contenteditable"
 □ 演讲者模式         — grep "function toggleSpeaker" + grep "BroadcastChannel" + grep "buildPresenterWindow"
-□ 提词面板           — grep "var NOTES" + grep "notes-on"（N 键面板 + 演讲者跟开）
+□ 备注卡             — grep "var NOTES"（演讲者窗口备注卡读 NOTES 对象，键=页 id）
 □ Preview-only       — grep "?preview=N"（演讲者 iframe 预览只渲染单页）
 □ 打印定格           — grep "\.rv { opacity: 1 !important"（print.css 强制定格终值防空白页）
 ```
@@ -95,7 +95,7 @@ L3 强制规则（必须全部执行）：
 <style>
   /* ===== chassis/core.css ===== */      ← 舞台/token/页骨架/.rv（核心，禁散改）
   /* ===== modules/effects.css ===== */   ← 动画件（spot-group 等变体）
-  /* ===== modules/interactions.css ===== */ ← 交互件（画笔/编辑/提词/演讲者按钮）
+  /* ===== modules/interactions.css ===== */ ← 交互件（画笔/编辑/演讲者按钮）
   /* ===== modules/print.css ===== */     ← P 键打印/PDF 定格
 </style>
 
