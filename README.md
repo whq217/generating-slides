@@ -2,6 +2,10 @@
 
 **简体中文** ｜ [English](README_en.md)
 
+> **A Claude Code skill that turns one sentence or a document into a projector-grade HTML slide deck.**
+> Single self-contained file, zero dependencies, no CDN or build step — layered layout rules (coverage · type size · order · focus) enforced before output, with a built-in pre-delivery check.
+> → Full English documentation: [README_en.md](README_en.md)
+
 > 给 Claude Code 用的技能包：按「版面率 → 字号 → 秩序」三层底层约束 + 焦点判断层，生成 1920×1080 单文件 HTML 演示稿（内置交互三件套 + 动画库 + PDF 双出口），产出前过机验。
 >
 > **执行规则以 [SKILL.md](SKILL.md) 为准，本文件仅为安装与概览说明**（2026-10-21 立：防两文件漂移）。
