@@ -1,0 +1,9 @@
+# 统一换行：机验链路依赖逐字节 sha256，禁止平台自动转换
+* text=auto eol=lf
+
+# 以下文件被 samples/patches.json 记录 sha256，一旦被转换成 CRLF
+# build_samples.py 的还原自证会全部失配、verify-all 直接判红，故显式锁定 LF
+samples/good/chassis.html   text eol=lf
+samples/_base/*.html        text eol=lf
+samples/patches.json        text eol=lf
+samples/expected.json       text eol=lf

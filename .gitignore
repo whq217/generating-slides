@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# 机验中间产物
+# samples/build_samples.py 默认写入系统临时目录，此处仅防御性忽略
+samples/bad/
+*.verify-cache
+
+# 演示产物（本仓库只放生成器，不放生成的 deck）
+*.pptx
+*.pdf
+deck.html
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~

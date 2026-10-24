@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<!-- ⚠️ 本文件由 scripts/build-chassis.mjs 装配生成（全量装配）——禁手改；改 assets/chassis/ 或 assets/modules/ 后重跑 build -->
+
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>底盘 v2 · 新范式</title>
+<style>
+/* ===== chassis/core.css ===== */
+/* ============================================================
+   底盘 chassis v2 —— 全片唯一，零选择（1920×1080，等比缩放）
+   ------------------------------------------------------------
+   红线注释区（与 references/layout-rules-v2.md 双落点）：
+   ▍第一层 底盘：版面率
+     密排页内容包围盒 ≥60% 面积且宽 ≥80%（锚 75%）
+     双栏短内容页 ≥45%；单焦点页主角块宽 ≥60% 版心
+     达标手段白名单：换纵向/升字号/换轻容器/砍页
+     永禁：加图标、加数据条、拉 gap 凑数（60% 反噬史）
+   ▍第二层 阅读：字号（屏高制 1080 舞台）
+     正文地板 22px（1/50 线）；meta 16px；边注 13px 豁免
+     标题：主张型 84px 全片锁死 / 话题型 72-96 密度带内
+     仪式位主角 110-140px = 目标占版宽(60-85%版心)÷行字数
+     标题:正文 3.8:1-5:1；禁 max-width 防溢钳制，改反推字号
+   ▍第三层 秩序：分组/对齐/间距
+     间距档位跟层级树：板块间 64-72 / 组间 28-32 / 条目 14-18
+     相邻档比 ≥2:1；禁等距；gap 管亲疏 padding 管呼吸
+     容器阶梯：盒>线(发丝线/顶线卡)>留白选最轻够用；默认无盒，出卡自证四场景（focus-judgment §二）
+     一页一左轴；居中仅仪式位；禁垂直居中缩团（分布铺满）
+     负例禁令：token 外无渐变/无阴影/无圆角（--radius- 与 --shadow- 两族 token 默认 0/none，风格配方显式开启才生效）；无第二字体/数字无色块
+   ============================================================ */
+:root {
+  --bg: #101418;
+  --ink: #E9E7E2;
+  --ink-dim: #9AA0A8;
+  --accent: #E8A33D;
+  --hairline: rgba(233, 231, 226, 0.16);
+  --warn: var(--accent);  /* 语义辅助色（警示/风险/负面/数据对比）——无机械派生规则，风格配方按对主题色的理解指定并写一句理由；未指定时退回 accent。只落内容（数字/文字），禁进装饰 */
+  /* 装饰层 token（.deco 专用，2026-10-23 立）：装饰颜色只吃 var() 链派生，禁写死 hex */
+  --deco-tint: var(--accent);   /* 装饰母色=全片色调家族（颜色一锅汤） */
+  --deco-x: 78%; --deco-y: 86%; --deco-size: 1000px;  /* 光斑位置/尺寸 */
+  --deco-cell: 96px; --deco-line: 1px;  /* 网格单元/线宽 */
+  /* 负面清单开口子：默认全关（0/none 外观与原版一致），风格配方开启才生效 */
+  --radius-card: 0px;
+  --shadow-card: none;
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  /* 字号阶梯（密度-字号表见 layout-rules-v2 §2.2） */
+  --fs-title: 84px;      /* 内容页标题：主张型锁死，话题型 72-96 密度带 */
+  --fs-quote: 140px;     /* 仪式位主角：短行档（7-8字/行）；长行 112 */
+  --fs-num-hero: 176px;  /* 焦点数字 */
+  --fs-num: 92px;        /* metric 大数 */
+  --fs-sub: 30px;        /* 行组小标题 */
+  --fs-body: 24px;       /* 正文（地板 22） */
+  --fs-punch: 32px;      /* 压轴行 */
+  --fs-meta: 16px;       /* meta 档 */
+  --fs-marg: 13px;       /* 边注豁免档 */
+  /* 间距档位（N 层 N 档，禁等距） */
+  --s-in: 14px;          /* 档3 条目间 */
+  --s-mid: 28px;         /* 档2 组间 */
+  --s-out: 64px;         /* 档1 板块间 */
+  --s-line: 24px;        /* 行组行距（高密度可收 20） */
+  --pad-v: 84px;
+  --pad-h: 136px;
+}
+/* 色板三选（第 3 步三风格样张用：加在 <body> 上，如 <body class="palette-b">；结构不变只换色）*/
+.palette-b { --bg:#F7F4EE; --ink:#1C1A17; --ink-dim:#8A8478; --accent:#A6521F; --hairline:rgba(28,26,23,.16); }  /* B 纸白编辑：暖米白+墨黑+赭橙（Monocle 杂志感） */
+.palette-c { --bg:#0B1E2D; --ink:#EAF1F5; --ink-dim:#8FA5B5; --accent:#E85D3D; --hairline:rgba(234,241,245,.16); }  /* C 蓝黑瑞士：深海军+信号橙（高对比冷静） */
+/* A 深色工业为默认（不加类）：#101418 底+琥珀 accent */
+/* 类名注册表（2026-10-23 M1 立，机检自动提取——检查器禁手抄名单）：
+   加组件类 = 在其定义块体首打 @critical（漏搬即严重）/ @hook（无定义亦合法，动画件）
+   / @svg-text（SVG 文字免显式 fill）标记注释；归属 = 选择器最右分段的类名。
+   无 CSS 定义或选择器形态提取不到的类，登记在下行声明里。改底盘即自动跟。 */
+/* @critical-declared: chart */
+/* hook 声明行分组（维护必读）：三类混装——①纯 JS/状态钩子（reveal/active/show 等，无 CSS 定义）
+   ②spot-group（仅后代选择器形态，行内标记够不着）③末尾 4 个 = v1 遗留类（slide-title/
+   slide-head/slide-body/cover-subtitle）：孤儿检查放行、拦截在 S8 指纹，禁删——删了 v1 归档稿
+   会误报致命孤儿。动画件类（bar/line/dot/step）走 effects.css 行内标记，不在此行。 */
+/* @hook-declared: reveal slides slide fragment visible impact stagger present hl tone-alt hl--alt active edit-mode cover-active scrollable show speaker-notes no-print current past future spot-group slide-title slide-head slide-body cover-subtitle */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; background: var(--bg); overflow: hidden; }
+body { font-family: var(--font-sans); color: var(--ink); }
+
+.stage { width: 1920px; height: 1080px; position: absolute; top: 50%; left: 50%; transform-origin: center center; }
+
+/* 页骨架：kicker → 标题 → 内容区 → 边注四件套（frame pre-printed 零动画） */
+.slide { position: absolute; inset: 0; display: none; padding: var(--pad-v) var(--pad-h) 64px; }
+.slide.active { display: flex; flex-direction: column; }
+
+/* ── 装饰层容器 + 内容包裹层（2026-10-23 立，demo-deck 五页验证）──
+   用装饰的页：slide 首子元素挂 .deco（词汇见 effects.css 装饰章节），其余内容全部包进 .content。
+   .content 必须 z:1 永压装饰（z-index:-1 方案已实测不可行——stage transform 下装饰被 body 背景吃掉）。
+   不用装饰的页：内容直挂 slide（旧骨架不变，零破坏）。 */
+.deco { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.content { position: relative; z-index: 1; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.ritual .content { justify-content: center; align-items: flex-start; }  /* 仪式位居中在 .content 上兑现（slide 级被包裹层吃掉）*/
+.ritual.center .content { align-items: center; text-align: center; }
+.slide.has-metrics .content { justify-content: center; padding-bottom: 96px; }  /* 数据型封面三段式：标题块中偏上+数字条上提，禁与纯居中混用（重心偏下/顶空实测病） */
+.kicker { /* @critical */ font-size: var(--fs-meta); letter-spacing: 6px; color: var(--accent); font-weight: 600; }
+.head { /* @critical */ margin-top: 18px; }
+.head h2 { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 600; letter-spacing: 0.02em; line-height: 1.18; }
+.body-area { /* @critical */ flex: 1; display: flex; flex-direction: column; justify-content: flex-start; margin-top: var(--s-out); min-height: 0; }
+.folio { position: absolute; top: 84px; right: 136px; font-size: var(--fs-marg); color: var(--ink-dim); letter-spacing: 2px; }
+.footmark { position: absolute; bottom: 56px; left: 136px; font-size: var(--fs-marg); color: var(--ink-dim); letter-spacing: 3px; }
+.footmark::before { content: ""; display: inline-block; width: 28px; height: 1px; background: var(--hairline); vertical-align: middle; margin-right: 12px; }
+.corner-note { position: absolute; bottom: 96px; right: 136px; font-size: var(--fs-meta); color: var(--ink-dim); }
+
+/* 槽位①：行组（主力——围绕论点的论据，无盒，金点+小标题+正文） */
+.row-group { display: flex; flex-direction: column; gap: var(--s-line); flex: 1; }
+.row { /* @critical */ flex: 1; align-items: center; display: flex; gap: 40px; padding: 22px 0; border-top: 1px solid var(--hairline); }
+.row:first-child { border-top: none; }
+.row .no { font-family: var(--font-serif); font-size: 26px; color: var(--accent); min-width: 64px; font-variant-numeric: tabular-nums; }
+.row .rt { font-size: var(--fs-sub); font-weight: 600; min-width: 280px; }
+.row .rd { font-size: var(--fs-body); color: var(--ink-dim); line-height: 1.6; flex: 1; }
+.row .rd strong { color: var(--ink); font-weight: 600; }
+
+/* 槽位②：双栏对比（hairlines over boxes：中缝发丝线，非卡片） */
+.duo { /* @critical */ display: flex; gap: 0; flex: 1; min-height: 0; }
+.duo .col { flex: 1; padding-right: 72px; display: flex; flex-direction: column; }
+.duo .col + .col { border-left: 1px solid var(--hairline); padding-left: 72px; padding-right: 0; }
+.duo h3 { font-family: var(--font-serif); font-size: 40px; font-weight: 600; margin-bottom: var(--s-mid); }
+.duo h3 .tag { font-family: var(--font-sans); font-size: var(--fs-meta); color: var(--accent); letter-spacing: 4px; display: block; margin-bottom: 14px; }
+.duo ul { list-style: none; display: flex; flex-direction: column; gap: 14px; flex: 1; justify-content: flex-start; }
+.duo li { font-size: var(--fs-body); line-height: 1.6; color: var(--ink-dim); padding: 14px 0 14px 26px; position: relative; }
+.duo li::before { content: ""; position: absolute; left: 0; top: 16px; width: 8px; height: 8px; background: transparent; border: 1px solid var(--accent); }
+.duo li strong { color: var(--ink); font-weight: 600; }
+
+/* 压轴行（内容定形态：金句级收束 A 案 / 普通收束 B 案 16px 灰） */
+.punch { /* @critical */ margin-top: auto; margin-bottom: 8px; padding-top: 28px; border-top: 2px solid var(--accent); font-family: var(--font-serif); font-size: var(--fs-punch); font-weight: 600; letter-spacing: 0.02em; }
+.punch .acc { color: var(--accent); }
+.punch .wrn { color: var(--warn); }  /* 压轴行风险词语义色 */
+
+/* 槽位③：焦点数字（低密度页——主从纵排贴身，说明在数字下方） */
+.hero-num-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; flex: 1; justify-content: center; }
+.hero-num { /* @critical */ font-family: var(--font-serif); font-size: var(--fs-num-hero); font-weight: 600; line-height: 0.9; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.hero-num small { font-size: var(--fs-body); font-weight: 400; color: var(--ink-dim); margin-left: 8px; letter-spacing: 0.06em; }  /* 单位退档=正文字号（周围退档律，不随数字染色） */
+.hero-cap { font-size: var(--fs-body); color: var(--ink-dim); }
+.metric-row { display: flex; gap: var(--s-out); margin-top: var(--s-out); }
+.metric { /* @critical */ flex: 1; border-top: 1px solid var(--hairline); padding-top: 18px; }
+.metric .mv { font-family: var(--font-serif); font-size: var(--fs-num); font-weight: 600; font-variant-numeric: tabular-nums; }
+.metric .mv small { font-size: 0.4em; font-weight: 400; color: var(--ink-dim); }
+.metric .ml { font-size: var(--fs-body); margin-top: 16px; }
+.metric .md { font-size: var(--fs-body); color: var(--ink-dim); margin-top: var(--s-in); line-height: 1.5; }
+
+/* 槽位④：仪式位（封面/金句/收尾——居中豁免，主角闭环反推） */
+.ritual { justify-content: center; align-items: flex-start; }
+.ritual.center { align-items: center; text-align: center; }
+.quote-line { font-family: var(--font-serif); font-size: var(--fs-quote); font-weight: 600; line-height: 1.32; letter-spacing: 0.04em; }
+.quote-line.long { font-size: 112px; }  /* 仪式位闭环降档类：9-13 字/行长行用（占版反推 ≈82% 版心），禁 inline 写字号 */
+.quote-line .qa { color: var(--accent); }
+.quote-attr { margin-top: var(--s-out); font-size: var(--fs-meta); color: var(--ink-dim); letter-spacing: 3px; }
+.cover-badge { /* @critical */ font-size: var(--fs-meta); letter-spacing: 8px; color: var(--accent); border: 1px solid var(--accent); padding: 10px 28px; display: inline-block; }
+.cover-title { /* @critical */ font-family: var(--font-serif); font-size: 140px; font-weight: 600; letter-spacing: 0.06em; line-height: 1.2; margin-top: 32px; }
+.cover-rule { /* @critical */ width: 96px; height: 3px; background: var(--accent); margin-top: 20px; }
+.cover-sub { /* @critical */ font-size: 36px; color: var(--ink-dim); margin-top: var(--s-mid); letter-spacing: 0.14em; }
+
+/* 封面数字条（数据汇报型封面变体，2026-10-23 立）：2-4 组关键数字贴底压轴，slide 须同时挂 .has-metrics（三段式）。
+   判定：内容有强数字（数据汇报型）才用，叙事型主题走纯仪式位。数字参与版率（非装饰）。 */
+.cover-metrics { position: absolute; bottom: 170px; left: 136px; z-index: 1; display: flex; gap: var(--s-out); }
+.cover-metrics .cm { border-top: 1px solid var(--hairline); padding-top: 18px; min-width: 210px; }
+.cm-v { font-family: var(--font-serif); font-size: 44px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.cm-v small { font-size: 0.42em; font-weight: 400; color: var(--ink-dim); margin-left: 6px; }  /* 单位退档，不随数字染色 */
+.cm-v.wr { color: var(--warn); }  /* 风险数字语义（与内页 .yy.warn 同一语言） */
+.cm-l { font-size: var(--fs-meta); color: var(--ink-dim); margin-top: 10px; letter-spacing: 2px; }
+
+/* 动画纪律：frame pre-printed, content newly arrived（--d 延迟分层） */
+.rv { opacity: 0; transform: translateY(18px); }
+.active .rv { animation: up 640ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes up { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; animation: none; } }
+.hint { position: absolute; bottom: 56px; right: 136px; font-size: var(--fs-marg); color: var(--ink-dim); letter-spacing: 2px; }
+
+/* ============================================================
+   组件库（2026-10-22 升底盘：实战稿验证后 token 化补齐判定树组件）
+   生成纪律：SVG 文本必须用下列类或显式 fill——SVG 默认黑字，深色底=隐形地雷
+   ============================================================ */
+.hero-split { display: flex; align-items: center; gap: 88px; flex: 1; }
+.hero-side { border-left: 1px solid var(--hairline); padding-left: 56px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.hero-side p { font-size: var(--fs-body); color: var(--ink-dim); line-height: 1.6; }
+.hero-side p b { color: var(--ink); font-weight: 600; }
+
+/* 占比条（构成数据槽位件） */
+.stack { display: flex; height: 118px; margin-top: var(--s-mid); }
+.stack .seg { display: flex; flex-direction: column; justify-content: center; padding-left: 26px; color: var(--bg); }
+.stack .seg.ink { background: var(--ink); }
+.stack .seg.acc { background: var(--accent); color: #fff; }
+.stack .seg .t { font-family: var(--font-serif); font-size: 26px; font-weight: 600; }
+.stack .seg .v { font-size: 21px; opacity: .86; margin-top: 6px; }
+.stack-cap { display: flex; justify-content: space-between; font-size: var(--fs-meta); color: var(--ink-dim); margin-top: 12px; letter-spacing: 1px; }
+
+/* 分段行组（量值并列/双栏清单） */
+.seg-list { display: flex; flex-direction: column; flex: 1; margin-top: 40px; }
+.seg-row { flex: 1; display: flex; align-items: center; gap: 36px; border-top: 1px solid var(--hairline); }
+.seg-row:first-child { border-top: 1px solid var(--ink); }
+.seg-row .nm { font-family: var(--font-serif); font-size: 30px; font-weight: 600; min-width: 240px; }
+.seg-row .vv { font-family: var(--font-serif); font-size: 44px; font-weight: 600; font-variant-numeric: tabular-nums; flex: 0 0 226px; }
+.seg-row .vv small { font-size: 0.42em; font-weight: 400; color: var(--ink-dim); margin-left: 8px; }
+.seg-row .yy { font-family: var(--font-sans); font-size: 24px; color: var(--ink-dim); flex: 0 0 168px; font-variant-numeric: tabular-nums; }
+.seg-row .yy.hi { color: var(--accent); }
+.seg-row .yy.warn { color: var(--warn); }  /* 风险/负面数值语义色（--warn 未指定时=accent，即无第二色） */
+.seg-row .note { font-size: 20px; color: var(--ink-dim); flex: 1; }
+
+/* 图例（图表的备注层：亲密性——组间档与图表拉开，非图表组成部分） */
+.legend { display: flex; gap: 32px; margin-top: var(--s-mid); font-size: var(--fs-meta); color: var(--ink-dim); }
+.legend i { display: inline-block; width: 22px; height: 8px; margin-right: 10px; vertical-align: middle; }
+
+/* 卡片（判定链出口件，2026-10-22 落底盘：默认无盒——R1 顶线卡=线档组标识，出卡须自证四场景之一，见 focus-judgment §二；frontend-slides 蒸馏 R1/R2/R3） */
+.card { /* @critical */ border-top: 2px solid var(--accent); padding: 18px var(--s-mid) 0 0; display: flex; flex-direction: column; align-items: flex-start; }
+.card-title { font-family: var(--font-serif); font-size: var(--fs-sub); font-weight: 600; }  /* 场景 1/2 文字卡标题 */
+.card-num { font-family: var(--font-serif); font-size: var(--fs-num); font-weight: 600; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }  /* R2 第一段：大数字主角（R3：随 --accent 自动随面翻转） */
+.card-num small { font-size: 0.4em; font-weight: 400; color: var(--ink-dim); margin-left: 8px; letter-spacing: 0.06em; }  /* 单位退档=周围退档律，不随数字染色 */
+.card-label { font-size: var(--fs-body); color: var(--ink); font-weight: 600; margin-top: 14px; }  /* R2 第二段：标签贴身 */
+.card-note { font-size: var(--fs-meta); color: var(--ink-dim); letter-spacing: 1px; margin-top: 10px; }  /* R2 第三段：meta 档小注（口径/来源） */
+.card-row { display: flex; gap: var(--s-out); }  /* 多卡并列容器：锁等宽等高（场景 4 规整对齐——异构单元基线不一的治法） */
+.card-row .card { flex: 1; }
+.card-box { border: 1px solid var(--hairline); background: color-mix(in srgb, var(--ink) 4%, transparent); padding: var(--s-mid); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }  /* 盒装变体：仅品牌风格预设点名使用；radius/shadow 走 token（默认 0/none 外观与原版一致；背景改 color-mix 跟 ink 走，palette 切换不再滞留旧色） */
+.card-box.lift { --radius-card: 14px; --shadow-card: 0 24px 56px color-mix(in srgb, var(--bg) 80%, black); }  /* 风格配方开口子载体：挂 .lift 即开圆角+投影（品牌卡场景；非品牌风格禁用） */
+.card.mute { border-top-color: var(--hairline); }  /* 卡组内中性变体（选择性突出第②式）：强调卡走 accent 默认、其余卡 mute 无色——组内只许一张主色卡（强调效力=使用密度的倒数） */
+.card.mute .card-num { color: var(--ink); }
+
+/* 小标题标记（内容组级扫读锚，2026-10-22 落底盘——维护者裁定：序列关系→行组 .no 编号 / 非序列→本标记，二选一禁双前缀；
+   页面级 kicker 管每页 head，本件管页内条目；形态按池：dash 字符=C 科技 / 默认竖块·hollow 空心框=A·B / dot 色点=D 温暖；
+   颜色 accent（默认）或 .dim 二选一，同 deck 统一；emoji 永久禁。纪律全文 → layout-rules-v2 §3.2b */
+.sh-mark { position: relative; padding-left: 0.85em; }
+.sh-mark::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 0.28em; height: 0.62em; background: var(--accent); }  /* 左置默认：实心竖块（几何形） */
+.sh-mark.dash::before { content: "—"; width: auto; height: auto; background: none; font-size: 0.8em; line-height: 1; color: var(--accent); }  /* 字符 glyph（em-dash；斜杠系预设可改 content:"/"） */
+.sh-mark.dot::before { width: 0.5em; height: 0.5em; border-radius: 50%; }  /* 色点 */
+.sh-mark.hollow::before { width: 0.55em; height: 0.55em; background: none; border: 1.5px solid var(--accent); }  /* 空心方框（与 duo bullet 空心框同语言，两级不同形时错开用） */
+.sh-mark.dim::before { background: var(--ink-dim); color: var(--ink-dim); border-color: var(--ink-dim); }  /* 颜色二选一（覆盖各形态） */
+/* 上置版（中轴/居中版式：标记—标题—正文共中轴垂直堆叠；挂在小标题元素上） */
+.sh-mark-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.sh-mark-top::before { content: ""; width: 0.62em; height: 0.28em; background: var(--accent); margin-bottom: 0.35em; }  /* 上置默认：横条 */
+.sh-mark-top.dash::before { content: "—"; width: auto; height: auto; background: none; font-size: 0.8em; line-height: 1; color: var(--accent); }
+.sh-mark-top.dot::before { width: 0.5em; height: 0.5em; border-radius: 50%; }
+.sh-mark-top.hollow::before { width: 0.55em; height: 0.55em; background: none; border: 1.5px solid var(--accent); }
+.sh-mark-top.dim::before { background: var(--ink-dim); color: var(--ink-dim); border-color: var(--ink-dim); }
+
+/* 双栏小节标签 */
+.duo h3 .tag { font-family: var(--font-sans); font-size: var(--fs-meta); color: var(--accent); letter-spacing: 5px; display: block; margin-bottom: 12px; }
+
+/* SVG 图表文本类（全部显式 fill——明度反向律的 SVG 落点；字号梯度：数值>类目名，数字是图内第一阅读点） */
+.chart .cl { /* @svg-text */ font-size: 26px; fill: var(--ink); font-family: var(--font-serif); }
+.chart .cv { /* @svg-text */ font-size: 32px; fill: var(--ink); font-family: var(--font-serif); font-variant-numeric: tabular-nums; }
+.chart .cy { /* @svg-text */ font-size: 21px; fill: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.chart .cy.dn { fill: var(--accent); }
+.chart .cs { /* @svg-text */ font-size: 19px; fill: var(--ink-dim); }
+.chart .bar-val { /* @svg-text */ font-family: var(--font-serif); font-size: 30px; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.chart .axis-lbl { /* @svg-text */ font-size: 22px; fill: var(--ink-dim); }
+.chart .bar-yoy { /* @svg-text */ font-size: 21px; fill: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.chart .bar-yoy.hot { fill: var(--accent); }
+
+
+/* ===== modules/effects.css ===== */
+/* ============================================================
+   图表生长动画（动画件，按需装配；2026-10-21 v2 原生）
+   配方类名驱动，零属性配合。手写 SVG 图表按 chart-recipes §6 类名规范：
+   柱 rect.bar / 折线 path.line / 数据点 circle.dot；
+   网格线/标签不加类名自动静止。--i 可选逐项错开、--d 起步延迟。
+   ============================================================ */
+.active .chart .bar { /* @hook */ transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); animation: chart-grow 800ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: calc(var(--d, 200ms) + var(--i, 0) * 90ms); }
+@keyframes chart-grow { to { transform: scaleY(1); } }
+.active .chart .bar-h { /* @hook */ transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(0); animation: chart-grow-h 800ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: calc(var(--d, 200ms) + var(--i, 0) * 90ms); }
+@keyframes chart-grow-h { to { transform: scaleX(1); } }
+.active .chart .line { /* @hook */ stroke-dasharray: var(--len, 2600); stroke-dashoffset: var(--len, 2600); animation: chart-draw 1100ms ease-out forwards; animation-delay: calc(var(--d, 250ms) + var(--i, 0) * 90ms); }
+@keyframes chart-draw { to { stroke-dashoffset: 0; } }
+.active .chart .dot { /* @hook */ opacity: 0; animation: chart-pop 480ms ease-out forwards; animation-delay: calc(var(--d, 650ms) + var(--i, 0) * 90ms); }
+@keyframes chart-pop { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .active .chart .bar { animation: none; transform: none; }
+  .active .chart .line { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+  .active .chart .dot { animation: none; opacity: 1; }
+}
+
+/* ============================================================
+   动画库扩充（2026-10-21，承 v1 animation-patterns 存档·v2 重写）
+   路由真源 = references/animation-routing.md（按演讲类型/氛围自动配，
+   不逐个问客户）。类名挂上即生效；.rv 默认淡入上滑仍是 90% 场景主力。
+   ============================================================ */
+
+/* —— 封面主角变体（默认走 .rv；两式按氛围路由，替代 .rv 使用） —— */
+.anim-scale { opacity: 0; }
+.active .anim-scale { animation: animScaleIn 700ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes animScaleIn { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
+.anim-blur { opacity: 0; }
+.active .anim-blur { animation: animBlurIn 900ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes animBlurIn { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: blur(0); } }
+
+/* —— 特殊动画（路由表点名单用，不默认） —— */
+.zoom-pop { opacity: 0; }
+.active .zoom-pop { animation: zoomPop 650ms cubic-bezier(0.34,1.56,0.64,1) forwards; animation-delay: calc(var(--d, 350ms) + var(--i, 0) * 90ms); }
+@keyframes zoomPop { 0% { opacity: 0; transform: scale(0.6); } 70% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: scale(1); } }
+.rise-in { opacity: 0; }
+.active .rise-in { animation: riseIn 760ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes riseIn { from { opacity: 0; transform: translateY(44px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+.neon-glow { animation: neonPulse 2.6s ease-in-out infinite; }
+@keyframes neonPulse { 0%, 100% { text-shadow: 0 0 8px var(--accent); } 50% { text-shadow: 0 0 26px var(--accent); } }
+.typewriter { visibility: hidden; }
+.typewriter.tw-on { visibility: visible; }
+.typewriter.tw-on .tw-ch { opacity: 0; animation: twCh 60ms steps(1) forwards; }
+@keyframes twCh { to { opacity: 1; } }
+
+/* —— 背景效果（科技氛围预设专用；纸白/瑞士类排版禁用） —— */
+.bg-grid { background-image: linear-gradient(var(--hairline) 1px, transparent 1px), linear-gradient(90deg, var(--hairline) 1px, transparent 1px); background-size: 56px 56px; }
+.geo-float { position: absolute; border-radius: 50%; opacity: 0.08; background: var(--accent); filter: blur(40px); animation: geoFloat 22s infinite ease-in-out; pointer-events: none; }
+@keyframes geoFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+.particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.4; }
+
+/* ============================================================
+   装饰层词汇（2026-10-23 立，demo-deck 五页验证后入盘）
+   ------------------------------------------------------------
+   容器 .deco（core.css）+ 下列词条。两条铁律（2026-10-23 立）：
+   ① 颜色一锅汤——全片一个色调家族（--deco-tint 承载），禁引第二家族；
+     语义色 --warn 只落内容不进装饰
+   ② 装饰一套词——全片同一形态语言：签名词汇（atmos/grid/scan/sweep/band）
+     全片贯穿（封面浓=容器默认 / 内页淡=.deco.dim），装置 device 仅封面
+     （默认）与收尾（.deco.soft）呼应，禁在中间内容页乱入
+   一页 ≤2 件；颜色只吃 var() 链 + color-mix 派生，禁写死 hex；
+   装饰参与构图平衡但版率探针不计（measure-layout 已排除 .deco）
+   ============================================================ */
+/* 词条·明暗渐变 atmos（家族底：左上微亮→右下渐暗造深度 + 两团极淡 tint） */
+.deco .atmos { position: absolute; inset: 0;
+  background:
+    radial-gradient(var(--deco-size) 700px at var(--deco-x) var(--deco-y), color-mix(in srgb, var(--deco-tint) 9%, transparent), transparent 66%),
+    radial-gradient(720px 480px at 6% 2%, color-mix(in srgb, var(--deco-tint) 5%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--ink) 4%, var(--bg)), var(--bg) 52%, color-mix(in srgb, black 18%, var(--bg))); }
+/* 词条·技术网格 grid（隐喻底：产业测距网） */
+.deco .grid { position: absolute; inset: 0; opacity: .55;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) var(--deco-line), transparent var(--deco-line)),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) var(--deco-line), transparent var(--deco-line));
+  background-size: var(--deco-cell) var(--deco-cell); }
+/* 词条·扫描线纹理 scan（横纹细密底，克制度最高） */
+.deco .scan { position: absolute; inset: 0; opacity: .55;
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--ink) 3%, transparent) 0, color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px, transparent 4px); }
+/* 词条·动效扫描 sweep（横光带自顶向下巡扫，动效签名） */
+.deco .sweep { position: absolute; left: 0; right: 0; height: 2px; top: 0;
+  background: linear-gradient(90deg, transparent, var(--deco-tint), transparent);
+  opacity: .14; animation: decoSweep 12s linear infinite; }
+@keyframes decoSweep { to { transform: translateY(1080px); } }
+/* 词条·色带 band（右缘竖向渐变收边） */
+.deco .band { position: absolute; right: 0; top: 0; bottom: 0; width: 14px;
+  background: linear-gradient(to bottom, var(--deco-tint), transparent 78%); opacity: .5; }
+/* 词条·主题装置 device（隐喻柱阵，立式元素：仅封面/收尾，禁中间内容页） */
+.deco .device { position: absolute; right: 110px; bottom: 0; width: 520px; height: 540px;
+  display: flex; align-items: flex-end; gap: 10px; opacity: .42; }
+.deco .device i { flex: 1; background: linear-gradient(to top, var(--deco-tint), transparent); }
+.deco .device i:nth-child(1) { height: 32%; } .deco .device i:nth-child(2) { height: 48%; }
+.deco .device i:nth-child(3) { height: 26%; } .deco .device i:nth-child(4) { height: 62%; }
+.deco .device i:nth-child(5) { height: 40%; } .deco .device i:nth-child(6) { height: 78%; }
+.deco .device i:nth-child(7) { height: 55%; } .deco .device i:nth-child(8) { height: 92%; }
+/* 浓淡两档：内容页 .dim（签名淡用）/ 收尾 .soft（装置淡版呼应） */
+.deco.dim .grid { opacity: .3; }
+.deco.dim .atmos { opacity: .7; }
+.deco.soft .device { opacity: .2; }
+@media (prefers-reduced-motion: reduce) { .deco .sweep { animation: none; opacity: .06; } }
+
+/* —— 3D 悬停（品牌风卡片可选；JS 自动扫 .tilt-card） —— */
+.tilt-card { transform-style: preserve-3d; perspective: 1000px; transition: transform 0.15s ease-out; }
+
+/* —— step 叙事（逐步揭示：点击先出完本页 step 再翻页；纪律=组首条不挂，防"翻到即空页"） —— */
+.step { /* @hook */ opacity: 0; transform: translateY(15px); transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+.step.on { opacity: 1; transform: none; }
+.step.impact { opacity: 0; transform: scale(0.85) translateY(10px); transition: opacity 0.6s cubic-bezier(0.34,1.56,0.64,1), transform 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+.step.impact.on { opacity: 1; transform: scale(1) translateY(0); }
+
+/* —— 聚光式 step（并列板块"讲到谁亮谁"：组容器挂 .spot-group，非当前项 .spot-dim 退后；打印定格见 print.css，编辑态全亮） —— */
+.spot-group > * { transition: opacity 0.5s ease; }
+.spot-group .spot-dim { opacity: 0.3 !important; }   /* important 防 .rv forwards 定格压 dim（复检风险项） */
+.edit-mode .spot-group .spot-dim { opacity: 1 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-scale, .anim-blur, .zoom-pop, .rise-in { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+  .neon-glow, .geo-float { animation: none !important; }
+  .step, .step.impact { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .spot-group > * { transition: none !important; }
+  .typewriter { visibility: visible !important; }
+  .typewriter .tw-ch { opacity: 1 !important; animation: none !important; }
+}
+
+
+/* ===== modules/interactions.css ===== */
+/* ============================================================
+   交互四件套样式（基本件）：编辑E / 画笔D / 演讲者S / 提词N
+   chrome 层，不参与 slide 排版红线
+   ============================================================ */
+/* 提词面板（贴舞台底部，随舞台缩放；深底双风格通吃） */
+.notes-panel { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(14,16,20,0.96); color: #E9E7E2; padding: 22px 136px 28px; display: none; z-index: 60; }
+body.notes-on .notes-panel { display: block; }
+.notes-panel .nt { font-size: 12px; letter-spacing: 5px; color: var(--accent); margin-bottom: 10px; }
+.notes-panel ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.notes-panel li { font-size: 17px; line-height: 1.55; color: #E4E1DB; padding-left: 16px; position: relative; }
+.notes-panel li::before { content: "—"; position: absolute; left: 0; color: #7A7F87; }
+
+/* 画笔 */
+.pen-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 500; pointer-events: none; }
+.pen-canvas.active { pointer-events: auto; cursor: crosshair; }
+
+/* 浮动圆按钮（画笔/演讲者）：token 配色，内联 SVG 零外部依赖 */
+.fab { position: fixed; bottom: 20px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%; background: transparent; border: 1px solid var(--hairline); color: var(--ink-dim); cursor: pointer; opacity: 0.4; transition: all 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; }
+.fab:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+.fab.active { opacity: 1; background: var(--accent); color: #fff; border-color: transparent; }
+.fab svg { width: 18px; height: 18px; display: block; }
+.pen-toggle { right: 20px; }
+.spk-toggle { right: 76px; }
+
+/* 编辑模式：左上热区 + 按钮 */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 10px; left: 10px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10001; background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font-size: 14px; font-family: var(--font-sans); }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-mode .stage .slide [contenteditable="true"] { outline: 1px dashed var(--accent); outline-offset: 2px; cursor: text; min-height: 1em; }
+.edit-mode .stage .slide [contenteditable="true"]:hover { outline-style: solid; }
+
+
+/* ===== modules/print.css ===== */
+/* ============================================================
+   PDF 导出（基本件，2026-10-21 v2 原生）：P 键打印 / headless --print-to-pdf
+   @page 16:9 零边距，每页一张；chrome 全退出；.rv 与图表动画强制定格终值防空白页
+   导出命令：chrome --headless=new --no-pdf-header-footer --virtual-time-budget=6000 --print-to-pdf="out.pdf" "file:///...html"
+   ============================================================ */
+@media print {
+  html, body { height: auto; background: #fff; overflow: visible; }
+  .stage { position: static; transform: none !important; width: 1920px; height: auto; }
+  .slide { display: flex !important; position: relative; inset: auto; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+  .slide:last-of-type { break-after: auto; page-break-after: auto; }
+  .rv { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .spot-group .spot-dim { opacity: 1 !important; }
+  .chart .bar, .chart .bar-h, .chart .line, .chart .dot { animation: none !important; transform: none !important; opacity: 1 !important; stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+  .pen-canvas, .pen-toggle, .spk-toggle, .edit-hotzone, .edit-toggle, .notes-panel, .hint { display: none !important; }
+}
+@page { size: 1920px 1080px; margin: 0; }
+
+</style>
+</head>
+<body><div></div></body>
+</html>

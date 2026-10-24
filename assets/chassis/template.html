@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>底盘 v2 · 新范式</title>
+<style>
+/*__CHASSIS_CSS__*/
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+<!-- ▍槽位示例：封面（仪式位·左轴·标题组收紧：badge32/线20/副题组间64） -->
+<section class="slide ritual active" id="p1">
+  <div class="folio">01 / 10</div>
+  <div class="cover-badge rv" style="--d:80ms">分享主题</div>
+  <h1 class="cover-title rv" style="--d:200ms">封面主标题</h1>
+  <div class="cover-rule rv" style="--d:400ms"></div>
+  <p class="cover-sub rv" style="--d:520ms">副标题一句话</p>
+  <div class="corner-note rv" style="--d:640ms">取材 · 来源</div>
+  <div class="footmark">DECK FINGERPRINT</div>
+  <div class="hint">→ 翻页</div>
+</section>
+
+<!-- ▍槽位示例：内容页骨架（kicker→主张型标题→内容区→角落注） -->
+<section class="slide" id="p2">
+  <div class="folio">02 / 10</div>
+  <div class="kicker rv">章节 · 主题词</div>
+  <div class="head"><h2 class="rv" style="--d:100ms">主张型标题：一句完整断言</h2></div>
+  <div class="body-area">
+    <!-- 内容槽位按判定树选：行组/双栏/焦点数字/时间线/表格。下方=数字滚动与图表生长演示 -->
+    <div class="metric-row rv" style="--d:200ms">
+      <div class="metric"><div class="mv">176<small>万辆</small></div><div class="md">数字自动滚动：.hero-num / .metric .mv / .num 命中，零属性配合</div></div>
+      <div class="metric"><div class="mv">1,247.2<small>万辆</small></div><div class="md">千分位 / 小数位 / 正负号滚动中原样保留</div></div>
+    </div>
+    <svg class="chart rv" style="--d:320ms;margin-top:32px" width="640" height="220" viewBox="0 0 640 220" role="img" aria-label="图表生长动画演示">
+      <line x1="0" y1="200" x2="640" y2="200" style="stroke:var(--line-struct)"/>
+      <rect class="bar" x="40" y="80" width="72" height="120" style="fill:var(--accent)"/>
+      <rect class="bar" x="160" y="120" width="72" height="80" style="fill:var(--accent);--i:1"/>
+      <rect class="bar" x="280" y="40" width="72" height="160" style="fill:var(--accent);--i:2"/>
+      <path class="line" d="M76 80 L196 120 L316 40 L436 90 L556 30" style="fill:none;stroke:var(--ink);stroke-width:3"/>
+      <circle class="dot" cx="436" cy="90" r="6" style="fill:var(--ink)"/>
+    </svg>
+  </div>
+  <div class="punch step">step 叙事演示：点击右半屏先亮出本行，再点才翻页（左向点击逆序收起）</div>
+  <div class="corner-note rv">数据源 · 备注可忽略信息入角落位</div>
+  <div class="footmark">DECK FINGERPRINT</div>
+</section>
+</div><!-- /stage -->
+
+<!-- 交互三件套 chrome：编辑热区/按钮 + 画笔 + 演讲者（提词 N 已移除 2026-10-24，职责归 S 演讲者窗口） -->
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="编辑模式 (E)">Edit</button>
+<canvas class="pen-canvas" id="penCanvas"></canvas>
+<button class="pen-toggle fab" id="penToggle" title="画笔模式 (D)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4L7 21H3v-4L17 3z"/></svg></button>
+<button class="spk-toggle fab" id="spkToggle" title="演讲者模式 (S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+
+<script>
+(function () {
+/*__CHASSIS_JS__*/
+__chassisInit();
+})();
+</script>
+</body>
+</html>

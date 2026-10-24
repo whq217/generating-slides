@@ -1,0 +1,280 @@
+{
+ "ck-hero-unit.html": {
+  "check-deck.py": {
+   "exit": 1,
+   "any": [
+    "单位未灰"
+   ]
+  },
+  "verify-consistency.py": {
+   "exit": 0
+  }
+ },
+ "ck-svg-nofill.html": {
+  "check-deck.py": {
+   "exit": 1,
+   "any": [
+    "SVG 黑字风险"
+   ]
+  },
+  "verify-consistency.py": {
+   "exit": 0
+  }
+ },
+ "ck-y-overflow.dq.html": {
+  "check-deck.py": {
+   "exit": 1,
+   "any": [
+    "标签出画布"
+   ]
+  },
+  "verify-consistency.py": {
+   "exit": 0
+  }
+ },
+ "ck-y-overflow.sq.html": {
+  "check-deck.py": {
+   "exit": 1,
+   "any": [
+    "标签出画布"
+   ]
+  },
+  "verify-consistency.py": {
+   "exit": 0
+  }
+ },
+ "vc-containers.dq.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "强调容器形态"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-containers.sq.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "强调容器形态"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-card-nohl.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "缺 hl"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-inline-9px.dq.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "内联字号"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-inline-9px.sq.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "内联字号"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-upper-px.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "内联字号"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-all-single-quote.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "内联字号"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-gap-3values.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "页间竖间距"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-hl-hover.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "光晕"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-single-col.html": {
+  "verify-consistency.py": {
+   "exit": 0,
+   "any": [
+    "单列纵排"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-orphan-metric.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "孤儿组件类"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-dangling-fs.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "字号类 CSS 变量悬空"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-dangling-deco.html": {
+  "verify-consistency.py": {
+   "exit": 0,
+   "any": [
+    "悬空 CSS 变量"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-cover-fs.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "封面标题字号"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-no-footmark.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "S3"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-no-reduced.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "S7"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-d2-hex.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "D-2"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-stage-size.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "S1"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-v1-slide-title.dq.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "S8"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-v1-slide-title.sq.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "S8"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "bad-scan-base-empty.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "解析异常"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 1,
+   "any": [
+    "解析异常"
+   ]
+  }
+ }
+}

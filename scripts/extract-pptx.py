@@ -14,6 +14,10 @@ import os
 import sys
 from pptx import Presentation
 
+# Windows 控制台默认 GBK，中文标题/路径输出会 UnicodeEncodeError——脚本内自理，无需调用方加编码前缀
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 
 def extract_pptx(file_path, output_dir="."):
     """

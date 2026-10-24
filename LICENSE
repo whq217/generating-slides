@@ -1,7 +1,7 @@
 MIT License
 
 Copyright (c) 2025 Zara Zhang (original framework)
-Copyright (c) 2026 Hongqing W (enhanced version)
+Copyright (c) 2026 Hongqing W (derivative work / 二次开发)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,19 +25,20 @@ SOFTWARE.
 
 ## Attribution
 
-This project is an enhanced version of [Frontend Slides](https://github.com/zarazhangrui/frontend-slides)
-by @zarazhangrui, licensed under the MIT License.
+This project is a derivative work (二次开发) of [Frontend Slides](https://github.com/zarazhangrui/frontend-slides)
+by Zara Zhang, licensed under the MIT License (Copyright 2025 Zara Zhang).
 
-The following components are original contributions by Hongqing W:
-- LAYOUT_PATTERNS.md — layout pattern library
-- animation-patterns.md — entrance animation and chart animation system
-- CDN accessibility fixes (cdnjs.cloudflare.com migration)
-- Font Awesome icon rendering fixes
-- Page entrance animation system (CSS pre-hide + JS reveal dual-track approach)
-- ECharts chart animation presets (line/pie/bar/radar type-specific timing)
-- Cover animation system (@keyframes + .cover-el pattern)
-- Full-viewport background architecture (html-level gradient + fixed decorative elements)
-- Cover animation JS trigger safeguard (forced reflow for reliable @keyframes replay)
-- Theme CSS priority defense strategy (post-link style placement + !important fallbacks)
-- Rank bar animation system (data-w attribute + forced reflow pattern)
-- Content page readability overlay (semi-transparent gradient background on slides)
+It is NOT an original work. The upstream copyright notice and this permission notice are
+retained above, as required by the MIT License.
+
+Original work in this package — the chassis-v2 fixed-stage layout engine, the three-layer
+layout constraints (fill ratio → type scale → visual order), the seven-stage guided workflow,
+and the machine-verification pipeline — is copyright 2026 Hongqing W (published as 庆哥聊AI)
+and is released under the same MIT License. The package as a whole is distributed under MIT.
+
+## Third-Party Notices
+
+Stage 3 (content optimization) references the "Steve Jobs perspective" framing from
+[女娲·Skill造人术 (nuwa-skill)](https://github.com/alchaincyf/nuwa-skill), licensed under
+the MIT License. No source code from that project is redistributed here; only the
+analytical framing is referenced, with attribution retained in SKILL.md.

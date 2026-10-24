@@ -1,0 +1,114 @@
+/* ============================================================
+   图表生长动画（动画件，按需装配；2026-10-21 v2 原生）
+   配方类名驱动，零属性配合。手写 SVG 图表按 chart-recipes §6 类名规范：
+   柱 rect.bar / 折线 path.line / 数据点 circle.dot；
+   网格线/标签不加类名自动静止。--i 可选逐项错开、--d 起步延迟。
+   ============================================================ */
+.active .chart .bar { /* @hook */ transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); animation: chart-grow 800ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: calc(var(--d, 200ms) + var(--i, 0) * 90ms); }
+@keyframes chart-grow { to { transform: scaleY(1); } }
+.active .chart .bar-h { /* @hook */ transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(0); animation: chart-grow-h 800ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: calc(var(--d, 200ms) + var(--i, 0) * 90ms); }
+@keyframes chart-grow-h { to { transform: scaleX(1); } }
+.active .chart .line { /* @hook */ stroke-dasharray: var(--len, 2600); stroke-dashoffset: var(--len, 2600); animation: chart-draw 1100ms ease-out forwards; animation-delay: calc(var(--d, 250ms) + var(--i, 0) * 90ms); }
+@keyframes chart-draw { to { stroke-dashoffset: 0; } }
+.active .chart .dot { /* @hook */ opacity: 0; animation: chart-pop 480ms ease-out forwards; animation-delay: calc(var(--d, 650ms) + var(--i, 0) * 90ms); }
+@keyframes chart-pop { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .active .chart .bar { animation: none; transform: none; }
+  .active .chart .line { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+  .active .chart .dot { animation: none; opacity: 1; }
+}
+
+/* ============================================================
+   动画库扩充（2026-10-21，承 v1 animation-patterns 存档·v2 重写）
+   路由真源 = references/animation-routing.md（按演讲类型/氛围自动配，
+   不逐个问客户）。类名挂上即生效；.rv 默认淡入上滑仍是 90% 场景主力。
+   ============================================================ */
+
+/* —— 封面主角变体（默认走 .rv；两式按氛围路由，替代 .rv 使用） —— */
+.anim-scale { opacity: 0; }
+.active .anim-scale { animation: animScaleIn 700ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes animScaleIn { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
+.anim-blur { opacity: 0; }
+.active .anim-blur { animation: animBlurIn 900ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes animBlurIn { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: blur(0); } }
+
+/* —— 特殊动画（路由表点名单用，不默认） —— */
+.zoom-pop { opacity: 0; }
+.active .zoom-pop { animation: zoomPop 650ms cubic-bezier(0.34,1.56,0.64,1) forwards; animation-delay: calc(var(--d, 350ms) + var(--i, 0) * 90ms); }
+@keyframes zoomPop { 0% { opacity: 0; transform: scale(0.6); } 70% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: scale(1); } }
+.rise-in { opacity: 0; }
+.active .rise-in { animation: riseIn 760ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes riseIn { from { opacity: 0; transform: translateY(44px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+.neon-glow { animation: neonPulse 2.6s ease-in-out infinite; }
+@keyframes neonPulse { 0%, 100% { text-shadow: 0 0 8px var(--accent); } 50% { text-shadow: 0 0 26px var(--accent); } }
+.typewriter { visibility: hidden; }
+.typewriter.tw-on { visibility: visible; }
+.typewriter.tw-on .tw-ch { opacity: 0; animation: twCh 60ms steps(1) forwards; }
+@keyframes twCh { to { opacity: 1; } }
+
+/* —— 背景效果（科技氛围预设专用；纸白/瑞士类排版禁用） —— */
+.bg-grid { background-image: linear-gradient(var(--hairline) 1px, transparent 1px), linear-gradient(90deg, var(--hairline) 1px, transparent 1px); background-size: 56px 56px; }
+.geo-float { position: absolute; border-radius: 50%; opacity: 0.08; background: var(--accent); filter: blur(40px); animation: geoFloat 22s infinite ease-in-out; pointer-events: none; }
+@keyframes geoFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+.particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.4; }
+
+/* ============================================================
+   装饰层词汇（2026-10-23 立，demo-deck 五页验证后入盘）
+   ------------------------------------------------------------
+   容器 .deco（core.css）+ 下列词条。两条铁律（2026-10-23 立）：
+   ① 颜色一锅汤——全片一个色调家族（--deco-tint 承载），禁引第二家族；
+     语义色 --warn 只落内容不进装饰
+   ② 装饰一套词——全片同一形态语言：签名词汇（atmos/grid/scan/sweep）
+     全片贯穿（封面浓=容器默认 / 内页淡=.deco.dim）；
+     基础词条外按 decoration-vocab.md「主题装置」开窗现场定制（装置仅封面/收尾，
+     禁中间内容页乱入；band、device 已废除）
+   一页 ≤2 件；颜色只吃 var() 链 + color-mix 派生，禁写死 hex；
+   装饰参与构图平衡但版率探针不计（measure-layout 已排除 .deco）
+   ============================================================ */
+/* 词条·明暗渐变 atmos（家族底：左上微亮→右下渐暗造深度 + 两团极淡 tint） */
+.deco .atmos { position: absolute; inset: 0;
+  background:
+    radial-gradient(var(--deco-size) 700px at var(--deco-x) var(--deco-y), color-mix(in srgb, var(--deco-tint) 9%, transparent), transparent 66%),
+    radial-gradient(720px 480px at 6% 2%, color-mix(in srgb, var(--deco-tint) 5%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--ink) 4%, var(--bg)), var(--bg) 52%, color-mix(in srgb, black 18%, var(--bg))); }
+/* 词条·技术网格 grid（隐喻底：产业测距网） */
+.deco .grid { position: absolute; inset: 0; opacity: .55;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) var(--deco-line), transparent var(--deco-line)),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) var(--deco-line), transparent var(--deco-line));
+  background-size: var(--deco-cell) var(--deco-cell); }
+/* 词条·扫描线纹理 scan（横纹细密底，克制度最高） */
+.deco .scan { position: absolute; inset: 0; opacity: .55;
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--ink) 3%, transparent) 0, color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px, transparent 4px); }
+/* 词条·动效扫描 sweep（横光带自顶向下巡扫，动效签名） */
+.deco .sweep { position: absolute; left: 0; right: 0; height: 2px; top: 0;
+  background: linear-gradient(90deg, transparent, var(--deco-tint), transparent);
+  opacity: .14; animation: decoSweep 12s linear infinite; }
+@keyframes decoSweep { to { transform: translateY(1080px); } }
+/* 浓淡两档：内容页 .dim（签名淡用）/ 收尾 .soft（主题装置淡版呼应，装置 CSS 由生成端现场定制） */
+.deco.dim .grid { opacity: .3; }
+.deco.dim .atmos { opacity: .7; }
+@media (prefers-reduced-motion: reduce) { .deco .sweep { animation: none; opacity: .06; } }
+
+/* —— 3D 悬停（品牌风卡片可选；JS 自动扫 .tilt-card） —— */
+.tilt-card { transform-style: preserve-3d; perspective: 1000px; transition: transform 0.15s ease-out; }
+
+/* —— step 叙事（逐步揭示：点击先出完本页 step 再翻页；纪律=组首条不挂，防"翻到即空页"） —— */
+.step { /* @hook */ opacity: 0; transform: translateY(15px); transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+.step.on { opacity: 1; transform: none; }
+.step.impact { opacity: 0; transform: scale(0.85) translateY(10px); transition: opacity 0.6s cubic-bezier(0.34,1.56,0.64,1), transform 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+.step.impact.on { opacity: 1; transform: scale(1) translateY(0); }
+
+/* —— 聚光式 step（并列板块"讲到谁亮谁"：组容器挂 .spot-group，非当前项 .spot-dim 退后；打印定格见 print.css，编辑态全亮） —— */
+.spot-group > * { transition: opacity 0.5s ease; }
+.spot-group .spot-dim { opacity: 0.3 !important; }   /* important 防 .rv forwards 定格压 dim（复检风险项） */
+.edit-mode .spot-group .spot-dim { opacity: 1 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-scale, .anim-blur, .zoom-pop, .rise-in { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+  .neon-glow, .geo-float { animation: none !important; }
+  .step, .step.impact { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .spot-group > * { transition: none !important; }
+  .typewriter { visibility: visible !important; }
+  .typewriter .tw-ch { opacity: 1 !important; animation: none !important; }
+}

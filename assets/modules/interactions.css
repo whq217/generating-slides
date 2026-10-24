@@ -1,0 +1,24 @@
+/* ============================================================
+   交互三件套样式（基本件）：编辑E / 画笔D / 演讲者S
+   chrome 层，不参与 slide 排版红线
+   （提词 N 面板已移除 2026-10-24：主窗口是投屏观众可见，提词职责归 S 演讲者窗口备注卡）
+   ============================================================ */
+
+/* 画笔 */
+.pen-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 500; pointer-events: none; }
+.pen-canvas.active { pointer-events: auto; cursor: crosshair; }
+
+/* 浮动圆按钮（画笔/演讲者）：token 配色，内联 SVG 零外部依赖 */
+.fab { position: fixed; bottom: 20px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%; background: transparent; border: 1px solid var(--hairline); color: var(--ink-dim); cursor: pointer; opacity: 0.4; transition: all 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; }
+.fab:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+.fab.active { opacity: 1; background: var(--accent); color: #fff; border-color: transparent; }
+.fab svg { width: 18px; height: 18px; display: block; }
+.pen-toggle { right: 20px; }
+.spk-toggle { right: 76px; }
+
+/* 编辑模式：左上热区 + 按钮 */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 10px; left: 10px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10001; background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font-size: 14px; font-family: var(--font-sans); }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-mode .stage .slide [contenteditable="true"] { outline: 1px dashed var(--accent); outline-offset: 2px; cursor: text; min-height: 1em; }
+.edit-mode .stage .slide [contenteditable="true"]:hover { outline-style: solid; }

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图示模式库 Gallery — 9 种结构图参考实现</title>
+<!--
+  📐 图示模式库 Gallery（给模型看的参考实现 + 总控机制活演示）
+  - 9 节 = diagram-patterns.md §2 的 9 个配方逐一实例化，代码与配方保持一致
+  - 总控演示：改 :root 里 --accent 一个值 → 9 个图全部变色（图内零写死色值）
+  - 两档切换：改 --g-glow/--g-bar/--g-line 三个值（商务档默认 / 技术档 12px/6px/2px）
+  - 纯本地文件，无 CDN 依赖；生产 deck 中图标用 .sh-mark / SVG 内联（见 diagram-patterns §1.3/§5），零图标字体
+  - 本页是 1080 宽预览（非 1920 舞台）：px 约为产品口径的 1/1.78，复制进产物时字号按 diagram-patterns §1.3 取 24/22/20
+  - 本文件不是交付模板：生成 PPT 时以 chassis-v2.html 为底盘，图示配方粘进产物
+-->
+<style>
+  /* === 主题变量（换主题 = 只改这段）=== */
+  :root {
+    /* v2 五件套：产物口径，五个名字固定，缺一个都不许自造 */
+    --bg: #ffffff; --ink: #061b31; --ink-dim: #64748d;
+    --accent: #533afd; --hairline: #e5edf5;
+    --font-sans: 'Segoe UI', 'Noto Sans SC', 'PingFang SC', sans-serif;
+    /* 本页专用（非 v2 token）：辅色与浅底 */
+    --accent2: #ff00aa; --accent-light: rgba(83, 58, 253, 0.08);
+    /* 图示三件套 + 五色映射（商务档默认；技术档：glow 12px / bar 6px / line 2px） */
+    --g-glow: 0; --g-bar: 3px; --g-line: 1.5px; --g-node-radius: 6px;
+    --g-tone-1: var(--accent);
+    --g-tone-2: var(--accent2, var(--accent));
+    --g-tone-3: color-mix(in srgb, var(--accent) 70%, #fff);
+    --g-tone-4: color-mix(in srgb, var(--accent) 55%, #000);
+    --g-tone-5: color-mix(in srgb, var(--accent) 40%, #fff);
+  }
+  html, body { margin: 0; font-family: var(--font-sans); background: var(--bg); color: var(--ink); }
+  main { height: 100vh; overflow-y: auto; scroll-snap-type: y mandatory; }
+  section.slide { scroll-snap-align: start; min-height: 100vh; padding: 56px 72px; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center; max-width: 1080px; margin: 0 auto; }
+  .tag { font-size: 12px; letter-spacing: 0.12em; color: var(--accent); font-weight: 700; margin: 0 0 6px; }
+  .tag span { color: var(--ink-dim); font-weight: 400; letter-spacing: 0.02em; margin-left: 12px; }
+  h2 { font-size: 26px; margin: 0 0 28px; }
+  .note { font-size: 12.5px; color: var(--ink-dim); line-height: 1.8; max-width: 720px; }
+  .note code { background: var(--accent-light); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  /* === 图示公共段（与 diagram-patterns.md 保持一致）=== */
+  .g-canvas { display: flex; align-items: stretch; gap: 12px; }
+  .g-canvas .g-node { background: var(--bg); border: 1px solid var(--hairline);
+    border-radius: var(--g-node-radius); padding: 12px 14px;
+    box-shadow: 0 0 var(--g-glow) color-mix(in srgb, var(--accent) 35%, transparent); }
+  .g-canvas .g-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .g-canvas .g-desc { font-size: 12px; color: var(--ink-dim); line-height: 1.5; }
+  .g-canvas svg .i-faint { fill: currentColor; opacity: 0.08; }
+  .g-canvas svg .i-stroke { fill: none; stroke: currentColor; }
+  .g-canvas svg text { font-family: var(--font-sans); fill: var(--ink); }
+  .g-canvas svg .i-label { font-size: 13px; font-weight: 700; }
+  .g-canvas svg .i-label-sm { font-size: 11.5px; fill: var(--ink-dim); }
+
+  /* 模式专属（各节按配方） */
+  .g--pipeline { flex-direction: row; }
+  .g--pipeline .g-arrow { align-self: center; color: var(--g-tone-1); font-size: 18px; font-weight: 700; padding: 0 2px; }
+  .g--stack { flex-direction: column; gap: 8px; width: 100%; }
+  .g--stack .g-layer { border-left: var(--g-bar) solid var(--layer, var(--g-tone-1)); border-top: none; }
+  .g--matrix .g-axis { font-size: 11.5px; color: var(--ink-dim); letter-spacing: 0.1em; align-self: center; text-align: center; }
+  .g--timeline { position: relative; flex-direction: column; padding: 8px 0 0; }
+  .g--timeline .g-axisline { position: absolute; top: 40px; left: 4%; right: 4%; height: var(--g-line);
+    background: linear-gradient(90deg, var(--hairline), var(--g-tone-1), var(--hairline)); }
+  .g--timeline .g-when { font-size: 11.5px; color: var(--ink-dim); margin-bottom: 6px; }
+  .g--timeline .g-pin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg); margin: 0 auto 10px; }
+  .g--radial .g-hub { border: var(--g-line) solid var(--g-tone-1); background: var(--accent-light); text-align: center; padding: 20px 16px; }
+  .g--compare { display: block; width: 100%; }
+  .g--compare .g-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .g--compare th { font-size: 12px; color: var(--ink-dim); font-weight: 600; text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--hairline); }
+  .g--compare td { padding: 8px 10px; border-bottom: 1px solid var(--hairline); }
+  .g--compare .g-hi { background: var(--accent-light); }
+  .g--compare .g-badge { font-size: 11.5px; padding: 2px 10px; border-radius: 999px; }
+  .g--compare .g-yes { background: var(--g-tone-1); color: var(--bg); }
+  .g--compare .g-hold { border: var(--g-line) solid var(--g-tone-2); color: var(--g-tone-2); }
+  .g--compare .g-no { border: var(--g-line) solid var(--hairline); color: var(--ink-dim); }
+  .g--funnel { flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+  .g--funnel .g-final { border: var(--g-line) solid var(--g-tone-1); background: var(--accent-light); }
+</style>
+</head>
+<body>
+<main>
+
+<section class="slide">
+  <p class="tag">图示模式库 GALLERY</p>
+  <h2>9 种结构图示 · 一页一模式</h2>
+  <p class="note">
+    用法：滚轮翻页逐个查看；配方源在 <code>diagram-patterns.md</code>（触发/反触发/节点上限/完整代码）。<br>
+    总控演示：把本文件 <code>:root</code> 里的 <code>--accent</code> 换成任意主色（如 <code>#0a7d5c</code>），9 个图全部跟着变——图内零写死色值。<br>
+    两档：商务档（默认 <code>glow:0 / bar:3px / line:1.5px</code>）↔ 技术档（<code>12px / 6px / 2px</code>），改三个值即切换。<br>
+    加图前必过的一问：<strong>删掉这个图，读者会丢文字补不回来的信息吗？——不会就不加图。</strong>
+  </p>
+</section>
+
+<section class="slide">
+  <p class="tag">G-01 · 管线流 <span>归属 T-1 · 触发：顺序过程/数据链/审批流 · ≤5 节点</span></p>
+  <h2>数据处理链：四段管线</h2>
+  <div class="g-canvas g--pipeline">
+    <div class="g-node" style="flex:1;border-top:3px solid var(--g-tone-1)">
+      <div class="g-title">① 采集</div><div class="g-desc">多源数据接入</div></div>
+    <div class="g-arrow" aria-hidden="true">→</div>
+    <div class="g-node" style="flex:1;border-top:3px solid var(--g-tone-2)">
+      <div class="g-title">② 清洗</div><div class="g-desc">去重补缺归一</div></div>
+    <div class="g-arrow" aria-hidden="true">→</div>
+    <div class="g-node" style="flex:1;border-top:3px solid var(--g-tone-3)">
+      <div class="g-title">③ 建模</div><div class="g-desc">特征与训练</div></div>
+    <div class="g-arrow" aria-hidden="true">→</div>
+    <div class="g-node" style="flex:1;border-top:3px solid var(--g-tone-1)">
+      <div class="g-title">④ 交付</div><div class="g-desc">接口输出</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-02 · 分层栈 <span>新布局入口 · 触发：架构/依赖层级 · ≤4 层</span></p>
+  <h2>平台技术架构：四层栈</h2>
+  <div class="g-canvas g--stack">
+    <div class="g-node g-layer" style="--layer:var(--g-tone-1)">
+      <div class="g-title">L4 · 应用层</div><div class="g-desc">门户与移动端</div></div>
+    <div class="g-node g-layer" style="--layer:var(--g-tone-2)">
+      <div class="g-title">L3 · 服务层</div><div class="g-desc">微服务与网关</div></div>
+    <div class="g-node g-layer" style="--layer:var(--g-tone-3)">
+      <div class="g-title">L2 · 数据层</div><div class="g-desc">库仓与消息队列</div></div>
+    <div class="g-node g-layer" style="--layer:var(--g-tone-5)">
+      <div class="g-title">L1 · 设施层</div><div class="g-desc">算力网络与安全</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-03 · 2×2 矩阵 <span>归属 CP-3 · 触发：两正交维度分类决策 · 2×2 封顶</span></p>
+  <h2>需求优先级：影响 × 成本</h2>
+  <div class="g-canvas g--matrix" style="display:grid;
+       grid-template-columns:auto 1fr 1fr;grid-template-rows:1fr 1fr auto;gap:10px">
+    <div class="g-axis" style="writing-mode:vertical-rl;transform:rotate(180deg)">影响度 →</div>
+    <div class="g-node" style="border-top:3px solid var(--g-tone-3)"><div class="g-title">观察</div><div class="g-desc">低影响低成本</div></div>
+    <div class="g-node" style="border-top:3px solid var(--g-tone-1)"><div class="g-title">重点投入</div><div class="g-desc">高影响低成本</div></div>
+    <div></div>
+    <div class="g-node" style="border-top:3px solid var(--g-tone-5)"><div class="g-title">放弃</div><div class="g-desc">低影响高成本</div></div>
+    <div class="g-node" style="border-top:3px solid var(--g-tone-2)"><div class="g-title">排期</div><div class="g-desc">高影响高成本</div></div>
+    <div></div>
+    <div class="g-axis" style="grid-column:2/4;text-align:center">投入成本 →</div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-04 · 时间线 <span>归属 T-1 · 触发：时序事件/路线图 · ≤5 钉</span></p>
+  <h2>项目历程：三钉时间线</h2>
+  <div class="g-canvas g--timeline">
+    <div class="g-axisline" aria-hidden="true"></div>
+    <div style="display:flex;gap:12px">
+      <div style="flex:1;text-align:center">
+        <div class="g-when">2024 Q1</div><div class="g-pin" style="background:var(--g-tone-1)"></div>
+        <div class="g-node"><div class="g-title">立项</div><div class="g-desc">需求冻结</div></div></div>
+      <div style="flex:1;text-align:center">
+        <div class="g-when">2024 Q3</div><div class="g-pin" style="background:var(--g-tone-4)"></div>
+        <div class="g-node"><div class="g-title">预警</div><div class="g-desc">延期两周</div></div></div>
+      <div style="flex:1;text-align:center">
+        <div class="g-when">2025 Q1</div><div class="g-pin" style="background:var(--g-tone-2)"></div>
+        <div class="g-node"><div class="g-title">上线</div><div class="g-desc">全量发布</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-05 · 中心辐射 <span>归属 T-4 · 触发：一核心连 N 并行物 · ≤4 spokes</span></p>
+  <h2>数据中台：一核三能</h2>
+  <div class="g-canvas g--radial" style="display:grid;
+       grid-template-columns:1fr 1.3fr 1fr;grid-template-rows:1fr 1fr;gap:12px;align-items:center">
+    <div class="g-node"><div class="g-title">获客</div><div class="g-desc">渠道与线索</div></div>
+    <div class="g-node g-hub"><div class="g-title">数据中台</div><div class="g-desc">统一资产与服务</div></div>
+    <div class="g-node"><div class="g-title">风控</div><div class="g-desc">授信与反欺诈</div></div>
+    <div class="g-node"><div class="g-title">运营</div><div class="g-desc">活动与留存</div></div>
+    <div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-06 · 对比表 <span>归属 T-3 · 触发：N 选项 × M 标准评估 · 行≤4 列≤5</span></p>
+  <h2>建设方案选型：三案对比</h2>
+  <div class="g-canvas g--compare">
+    <table class="g-table">
+      <thead><tr><th>方案</th><th>初始成本</th><th>年运维</th><th>风险</th><th>结论</th></tr></thead>
+      <tbody>
+        <tr class="g-hi"><td><strong>自建</strong></td><td>340 万</td><td>180 万</td><td>团队缺口</td>
+          <td><span class="g-badge g-yes">采纳</span></td></tr>
+        <tr><td>采购 SaaS</td><td>120 万</td><td>260 万</td><td>数据出境</td>
+          <td><span class="g-badge g-hold">备选</span></td></tr>
+        <tr><td>混合</td><td>210 万</td><td>200 万</td><td>双头管理</td>
+          <td><span class="g-badge g-no">排除</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-07 · 漏斗 <span>新布局入口 · 触发：逐级收敛/转化率 · ≤4 级</span></p>
+  <h2>销售管线：四级收敛</h2>
+  <div class="g-canvas g--funnel">
+    <div class="g-node" style="width:100%;text-align:center">
+      <div class="g-title">线索 · 12,400</div><div class="g-desc">全量 100%</div></div>
+    <div class="g-node" style="width:78%;text-align:center">
+      <div class="g-title">商机 · 3,100</div><div class="g-desc">转化 25%</div></div>
+    <div class="g-node" style="width:56%;text-align:center">
+      <div class="g-title">报价 · 930</div><div class="g-desc">转化 30%</div></div>
+    <div class="g-node g-final" style="width:36%;text-align:center">
+      <div class="g-title">成交 · 341</div><div class="g-desc">整体 2.8%</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-08 · 同心环 <span>归属 T-5 · 触发：分层防御/信任层级（外护内） · ≤4 环</span></p>
+  <h2>安全体系：四环纵深</h2>
+  <div class="g-canvas g--rings" style="justify-content:center">
+    <svg viewBox="0 0 400 200" style="color:var(--g-tone-1);max-width:520px" role="img" aria-label="四层同心环">
+      <circle class="i-faint" cx="200" cy="100" r="90"/>
+      <circle class="i-faint" cx="200" cy="100" r="65"/>
+      <circle class="i-faint" cx="200" cy="100" r="40"/>
+      <circle cx="200" cy="100" r="18" fill="currentColor" opacity="0.25"/>
+      <circle class="i-stroke" cx="200" cy="100" r="18" stroke-width="2"/>
+      <text class="i-label-sm" x="296" y="104">边界防护</text>
+      <text class="i-label-sm" x="271" y="104">检测响应</text>
+      <text class="i-label-sm" x="246" y="104">身份权限</text>
+      <text class="i-label" x="200" y="105" text-anchor="middle">核心数据</text>
+    </svg>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="tag">G-09 · 韦恩 <span>新布局入口 · 触发：交叠是论点本身 · 两集合封顶</span></p>
+  <h2>能力交叉：解决方案力</h2>
+  <div class="g-canvas g--venn" style="justify-content:center">
+    <svg viewBox="0 0 400 200" style="color:var(--g-tone-2);max-width:520px" role="img" aria-label="两集合交集">
+      <circle class="i-stroke" cx="150" cy="100" r="78" stroke-width="2" opacity="0.7"
+        style="stroke:var(--g-tone-1)"/>
+      <circle class="i-stroke" cx="250" cy="100" r="78" stroke-width="2" opacity="0.7"/>
+      <path d="M 200,100 m -38,0 a 38,38 0 1,0 76,0 a 38,38 0 1,0 -76,0"
+        fill="currentColor" opacity="0.2"/>
+      <text class="i-label" x="105" y="105" text-anchor="middle">工程能力</text>
+      <text class="i-label" x="295" y="105" text-anchor="middle">业务理解</text>
+      <text class="i-label-sm" x="200" y="105" text-anchor="middle"
+        style="fill:var(--ink);font-weight:700">解决方案力</text>
+    </svg>
+  </div>
+  <p class="note" style="margin-top:28px">交集区是唯一加填充的区域，语义命名而非"A∩B"。</p>
+</section>
+
+</main>
+</body>
+</html>

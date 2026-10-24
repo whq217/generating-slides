@@ -1,0 +1,19 @@
+/* ============================================================
+   PDF 导出（基本件，2026-10-21 v2 原生）：P 键打印 / headless --print-to-pdf
+   @page 16:9 零边距，每页一张；chrome 全退出；.rv 与图表动画强制定格终值防空白页
+   导出命令：chrome --headless=new --no-pdf-header-footer --virtual-time-budget=6000 --print-to-pdf="out.pdf" "file:///...html"
+   ============================================================ */
+@media print {
+  /* 背景强制保留：Chrome 打印默认丢弃背景色，暗底 deck 会导出成白纸（0-23 修复） */
+  html, body, .slide, .slide * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  html, body { height: auto; background: #fff; overflow: visible; }
+  .stage { position: static; transform: none !important; width: 1920px; height: auto; }
+  .slide { display: flex !important; position: relative; inset: auto; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+  .slide:last-of-type { break-after: auto; page-break-after: auto; }
+  .rv { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .spot-group .spot-dim { opacity: 1 !important; }
+  .chart .bar, .chart .bar-h, .chart .line, .chart .dot { animation: none !important; transform: none !important; opacity: 1 !important; stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+  .pen-canvas, .pen-toggle, .spk-toggle, .edit-hotzone, .edit-toggle, .notes-panel, .hint { display: none !important; }
+  body.notes-on .slide, body.notes-safe .slide { padding-bottom: 64px !important; }  /* 提词安全区复位：print 下面板已隐藏，让位 padding 必须跟着回底盘底值 64px（0-23 修复：否则导出页底部空 288px）*/
+}
+@page { size: 1920px 1080px; margin: 0; }
