@@ -2,7 +2,7 @@
 name: generating-slides
 slug: generating-slides
 displayName: 网页幻灯片制作专家
-version: 1.1.2
+version: 1.2.0
 author: 公众号「庆哥聊AI」
 license: MIT
 summary: "说一句话或丢一份材料，出可直接放映的网页幻灯片——单文件 HTML、七步引导、三层排版硬约束、交付前自动体检。"
@@ -107,7 +107,7 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 
 ### 阶段4：生成大纲
 
-- 封面页第 1 页 + 结束页最后一页由大纲阶段自动追加，不计入用户指定页数
+- 封面页第 1 页 + 结束页最后一页由大纲阶段自动追加，不计入用户指定页数。**封面 hook 管道**：封面 hook 候选取自本阶段大纲的焦点列与钩子页（用户未定标题时封面标题=全片第一个钩子句），禁生成封面时现场另挖——判定树与装置规则见 [references/decoration-vocab.md](references/decoration-vocab.md) §五封面构图总纲
 - 数据驱动型标注图表页；按章节分组（每章 2-4 页）；总页数符合配置
 - **大纲必须含内容映射**：每页带「来源 + 焦点 + 槽位 + 密度档 + 文案类型」列，如 `P5 国家政策 ← 来源：文档§3.1 焦点：数字 槽位：焦点数字 密度：低 类型：结论`。焦点四类（数字/结论/图表/清单），槽位按下方判定树映射；文案类型按 [title-copy-types.md](references/title-copy-types.md) 体裁档位配比标注（结论/钩子/仪式）；钩子页须同时在副行写出数据注，无数据注视为未完成。填不出 = 该页未完成，先提炼焦点或拆页并页
 - **展示大纲，等待用户确认。**
@@ -177,7 +177,7 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 
 1. **底盘**：复制 chassis-v2.html（1920×1080 舞台 + token + 页骨架 + 边注四件套 + 翻页 JS）
 2. **风格映射**：所选预设的色板 → 按 [references/style-presets.md](references/style-presets.md) 顶部《v2 五件套映射表》折算到 chassis 的 `--bg/--ink/--ink-dim/--accent/--hairline`（缺项走派生公式，禁自造色值）；字体按同文件《字体落地表》取**跨平台栈**（顺序固定：预设原名 → 平台替代 Win/macOS 双写 → 通用族兜底；**包内不带任何字体文件，字形随使用者机器**，用户想还原原版就自己装 OFL 字体）（结构永远 v2，颜色跟预设走；入场节奏映射到 `.rv` 的 `--d` 延迟编排——氛围快慢由延迟疏密表达，禁夸张弹跳）
-   **装饰配方映射**：预设/即兴配方 → [references/decoration-vocab.md](references/decoration-vocab.md) 选主签名（≤2 种，全片贯穿：封面浓 `.deco` / 内容页淡 `.deco.dim` / 装置仅首尾 `.deco.soft`）。用装饰的页：slide 首子元素挂 `.deco` 容器，**其余内容全部包进 `.content`**（漏包 = 装饰压字）；不用装饰的页结构照旧。`--warn` 由预设指定（写配色理由）或留空退回 accent；数据汇报型主题封面可启用数字条变体（slide 挂 `.has-metrics` + `.cover-metrics`，三段式铁律见词汇库 §五）
+   **装饰配方映射**：预设/即兴配方 → [references/decoration-vocab.md](references/decoration-vocab.md) 选主签名（≤2 种，全片贯穿：封面浓 `.deco` / 内容页淡 `.deco.dim` / 装置仅首尾 `.deco.soft`）。用装饰的页：slide 首子元素挂 `.deco` 容器，**其余内容全部包进 `.content`**（漏包 = 装饰压字）；不用装饰的页结构照旧。`--warn` 由预设指定（写配色理由）或留空退回 accent；数据汇报型主题封面可启用数字条变体（slide 挂 `.has-metrics` + `.cover-metrics`，三段式铁律见词汇库 §5.3）；封面构图总纲（hook / 装置 / 数字条 / 四步流程）见词汇库 §五
 3. **逐页生成**：按大纲从 P1 到 PN 顺序，逐页过判定树选槽位（见下）；字号/间距只取 token 档；密度按大纲档位执行（超密度已在大纲砍掉）；**动画按 [references/animation-routing.md](references/animation-routing.md) 自动路由**——按阶段 1 内容侧重 + 阶段 5 氛围查套餐，给元素挂类名即生效（`.rv` 分层入场为默认主力），**不逐个问客户**
 4. **讲稿**：每页 3-5 条提词卡要点（不写逐字稿）写入产物 JS 的 `NOTES` 对象（键=页 id）——S 演讲者模式备注卡读此数据源
 5. **长 deck 分批落盘**（3-4 页/批防爆上下文），静默执行不弹窗
@@ -223,7 +223,7 @@ Select-String -Path dump.txt -Pattern 'REPORT::'
 ```
 
 - 断言 349 验收清单（number-typography R5）
-- `python scripts/verify-consistency.py <产物>` 静态一致性断言（纯 Python 零依赖）。**单一报告制**：脚本只出问题清单、不做交付裁决——[严重] = 骨架完整性（S1-S8 + 348/349）/ 孤儿组件类 / 强调容器形态数（>6 种）/ 缺 hl 卡片（>5 个）/ 内联字号 <11.5px（>10 处）/ 页间竖间距（>2 种；仅当生成端写了内联 gap 时生效，否则显示「统一」）/ 光晕配色 bug / 字号类变量悬空 / 封面标题字号覆盖 / 图表与图示规范 / 口径自洽，命中即 exit 1（=打回信号，逐项处理或说明理由后交付）；[提示] = 内联硬编码色、辅助色 tone、单列纵排、图示节点上限（D-3），以及上述「越线项未越线时」的计数提醒。处理决定权在生成端与使用者（旧 FAIL/HINT 两级裁决已降为信息分级，不再写任何计数文件）
+- `python scripts/verify-consistency.py <产物>` 静态一致性断言（纯 Python 零依赖）。**单一报告制**：脚本只出问题清单、不做交付裁决——[严重] = 骨架完整性（S1-S8 + 348/349）/ 孤儿组件类 / 强调容器形态数（>6 种）/ 缺 hl 卡片（>5 个）/ 内联字号 <11.5px（>10 处）/ 页间竖间距（>2 种；仅当生成端写了内联 gap 时生效，否则显示「统一」）/ 光晕配色 bug / 字号类变量悬空 / 封面标题字号覆盖 / 封面断言（视觉事件三选一——stamp 级数字 / .has-metrics+.cover-metrics / `.dv-` 装置标记，全缺 = 平庸封面；装饰词条对底色有效对比度 <1.1:1 = 隐身，仅当 deck 实际用了 `.deco` 对应词条才判；`.deco` 直接子元素 >2 件）/ 图表与图示规范 / 口径自洽，命中即 exit 1（=打回信号，逐项处理或说明理由后交付）；[提示] = 内联硬编码色、辅助色 tone、单列纵排、图示节点上限（D-3）、封面焦点让位梯度 / 巨型数字口径注缺失，以及上述「越线项未越线时」的计数提醒。处理决定权在生成端与使用者（旧 FAIL/HINT 两级裁决已降为信息分级，不再写任何计数文件）
 - `python scripts/check-deck.py <产物>` 同类错误全扫（四类：hero-num 单位灰 / SVG 着色 / 文本 y 越界 / **字号档位**——合法档位 = 底盘内容层实有档位**自动提取** ∪ `var(--fs-*)` token ∪ 规则批准档位，改底盘加档白名单自动跟，无手工同步）——改稿轮次与交付前各跑一次；档位外的字号一律报，先判断是底盘漏搬还是规则漏收，不要为了过检删规则（同类错误全扫制的机验落点）
 - **两套字号地板并存，别混用**：`22px` 是**设计地板**（正文级实际字号，排版规则，见 layout-rules-v2 §2.1）；机验里的 `11.5px` 是**内联覆盖地板**（只查 `style` 内联 `font-size`，防规则段漏搬）。11.5–22px 之间属「机验不管、靠人眼与 §2.1 兜」的灰区，交付前需自行用 measure-layout 复核
 - 不达标回白名单手段调（换纵向/升字号/换轻容器/砍页），永不加填充物
@@ -254,7 +254,7 @@ chrome --headless=new --user-data-dir="%TEMP%\chrome-pdf-profile" --no-pdf-heade
 | [references/focus-judgment.md](references/focus-judgment.md) | 阶段 3 焦点定档后 + 阶段 6 排版：焦点强调手法八件套 / 视觉重量红线 / 颜色纪律 / 卡片三用法分合 |
 | [references/presets-index.md](references/presets-index.md) | 阶段 5 先读：22 套预设索引 + 2×2 四池路由（物理分离的地图层） |
 | [references/style-presets.md](references/style-presets.md) | 阶段 5：22 套预设规格正文（Grep 直达小节） |
-| [references/decoration-vocab.md](references/decoration-vocab.md) | 阶段 5.3/6：装饰层词汇库——两铁律（颜色一锅汤/装饰一套词）+ 词条表 + 数据型封面三段式 + 踩坑记录 |
+| [references/decoration-vocab.md](references/decoration-vocab.md) | 阶段 5.3/6：装饰层词汇库——两铁律（颜色一锅汤/装饰一套词）+ 词条表 + 封面构图总纲（hook / 装置 / 数字条 / 四步流程）+ 踩坑记录 |
 | [references/content-preparation.md](references/content-preparation.md) | 阶段 2：提取命令、编码坑、图片筛选 |
 | [references/content-optimization.md](references/content-optimization.md) | 阶段 3：优化原则 + §3.7 焦点判定 |
 | [references/title-copy-types.md](references/title-copy-types.md) | 阶段 3-4：标题文案分型——体裁定配比（A/B/C 档）/ 位置定类型 / 钩子四约束 / 字号身份裁决 |
@@ -275,7 +275,7 @@ chrome --headless=new --user-data-dir="%TEMP%\chrome-pdf-profile" --no-pdf-heade
 | `scripts/check-deck.py` | 产物级断言四类：hero-num 单位灰 / SVG 着色（白名单=底盘 `@svg-text` 标记自动提取）/ 文本 y 越界 / **字号档位区间**（越界 8.4–176px 即报；区间内非底盘/规则档位只提示不拦截）（同类错误全扫制配套） |
 | `scripts/extract-pptx.py` | 阶段 2 分支C：.pptx 提取（需 python-pptx） |
 | `scripts/verify-consistency.py` | 静态一致性断言（纯 Python 零依赖）：孤儿类 / 字号地板 / 骨架完整性 / 扫描基数自证；类名基准=底盘 CSS 注册表自动提取（`@critical`/`@hook` 标记，加组件类改底盘即跟，脚本零改动） |
-| `scripts/verify-all.py` | 机验门禁总入口：改解析器/检查器后必跑——build 一致 + 正负样本闸（负样本由 `samples/patches.json` 现场生成、逐份 sha256 自证，含单引号双写法）+ 旧术语零命中 |
+| `scripts/verify-all.py` | 机验门禁总入口：改解析器/检查器/effects.css 后必跑——build 一致 + 正负样本闸（负样本由 `samples/patches.json` 现场生成、逐份 sha256 自证，含单引号双写法）+ 旧术语零命中 + 样本内嵌 deco 参数 == effects.css |
 
 ## 自信执行规则
 

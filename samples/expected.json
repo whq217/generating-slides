@@ -146,7 +146,7 @@
   "verify-consistency.py": {
    "exit": 0,
    "any": [
-    "单列纵排"
+    "祖先链无分栏信号"
    ]
   },
   "check-deck.py": {
@@ -179,7 +179,7 @@
   "verify-consistency.py": {
    "exit": 0,
    "any": [
-    "悬空 CSS 变量"
+    "多为历史残留"
    ]
   },
   "check-deck.py": {
@@ -191,6 +191,17 @@
    "exit": 1,
    "any": [
     "封面标题字号"
+   ]
+  },
+  "check-deck.py": {
+   "exit": 0
+  }
+ },
+ "vc-cover-plain.html": {
+  "verify-consistency.py": {
+   "exit": 1,
+   "any": [
+    "视觉事件证据全缺"
    ]
   },
   "check-deck.py": {

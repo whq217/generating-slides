@@ -158,6 +158,14 @@ for v in (x.strip() for x in re.findall(r'font-size:\s*([^;}]+)', deck_css, re.I
     elif lv not in KNOWN_PX:
         hints.append('非底盘/规则档位（区间内放行，创意值留痕）: ' + v)
 
+# —— ④b token 值区间（2026-10-24 对齐补）：--fs-* 的定义值同样受 8.4–176 约束 ——
+#     只查 font-size 字面量会漏掉「改 token 升字号」这条主路径（实测 --fs-num-hero: 228px 仍 PASS），
+#     与 SKILL 阶段 6.5「档位外的字号一律报」不符。token 名合法 ≠ 值合法，两件事分开判。
+for _m in re.finditer(r'--fs-[a-z0-9-]+\s*:\s*([0-9.]+)px', deck_css, re.I):
+    _px = float(_m.group(1))
+    if _px < FLOOR_PX or _px > CAP_PX:
+        issues.append('token 字号越界 %.1fpx（地板 8.4 / 上限 176）: %s' % (_px, _m.group(0)))
+
 # —— 行内 font-size（0-23 补）：style="...font-size:XXpx..." 与 <style> 段同口径（区间拦截/档位提示）
 for v in (x.strip() for x in re.findall(r'style="[^"]*font-size:\s*([^;"]+)', body, re.I)):
     lv = v.lower()

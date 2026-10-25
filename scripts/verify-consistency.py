@@ -7,6 +7,7 @@ verify-consistency.py — 静态一致性探针（不需要渲染，秒级）
   出现问题 exit 1（=打回信号），干净 exit 0；[严重]/[提示] 仅为分级标签（严重=结构性事故指纹，提示=阈值/版式建议），
   逐项处理或说明理由后交付，决定权在生成端与使用者。
   ── 严重项（exit 1）──
+  0. 扫描基数自证        解析基数为 0 报「解析异常」（M9：绿报告必须能证明「看见了没事」，单双引号通吃）
   1. 强调容器形态数      同层级"强调容器"用了几种（card/term-card/quote-bar/...），>6 即严重（4-6 只提示）
   2. 缺 hl 的卡片        class 含 card 但不含 hl 的个数，>5 即严重（1-5 只提示）
   3. 内联字号地板        style 里 font-size < 11.5px 的个数，>10 即严重（≤10 只提示）
@@ -16,6 +17,8 @@ verify-consistency.py — 静态一致性探针（不需要渲染，秒级）
   9. 孤儿 class          骨架/组件类（cover-title 等）HTML 用了但 CSS 无规则 → 严重；非关键类只提示
  10. 悬空 CSS 变量       :root 声明但全文无 var() 引用；字号类即严重（其余只提示）
  11. 封面标题字号覆盖    检出 .cover-title 却无显式 font-size 规则即严重（防回落浏览器默认 h1 爆行）
+ 11a. token 对比度       --ink/--ink-dim/--line-struct 对 --bg 静态对比度过低（2026-10-23 补）
+ 11b. 压轴句存在性       内容页缺 .punch → 只提示（2026-10-23 补，留痕不拦截）
  12. 骨架完整性          10 条硬断言（v2 活断言 8 条 + 348/349 两条）：S1 .stage 锁 1920×1080 /
                         S2 页集与翻页状态机（section.slide + classList.active）/ S3 每页边注必备件
                         （folio+footmark，版率探针排除锚点）/ S4 :root token 齐全 / S5 翻页通道存在
@@ -25,20 +28,30 @@ verify-consistency.py — 静态一致性探针（不需要渲染，秒级）
  13. 可视化规范          C-1 option 字号地板(<11.5) / C-2 图表页缺来源脚 / C-3 柱条 min 非 0 /
                         C-4 环形组件>5 / D-2 图示写死色值 → **严重**；
                         D-3 图示节点超上限（≤4/≤5 是经验阈值）→ 只提示。
+ 14. 口径自洽            文档宣称的「组数/判据数」vs 源码实数：实际值从源码算（组数=本 docstring
+                        编号最大值、FAIL 面=源码失败追加次数），宣称值从 README/SKILL 抓，
+                        不一致即 **严重** 并给 文件:行；0 处宣称跳过比对。
+ 15. 封面断言            a 视觉事件三证据取一（stamp 级数字 / .has-metrics+.cover-metrics /
+                        .dv- 装置标记）全缺 = 平庸封面 → **严重**（纯大标题不算数）；
+                        b 装饰隐身：grid/scan 有效对比度 <1.1:1 → **严重**。仅当 deck 实际用了
+                        .deco 对应词条才判（2026-10-24 复查补使用前提——CSS 里留着旧参数词条规则
+                        ≠ 页面用了它，不设前提会把「不用装饰的合法 deck」与存量旧稿永久判红；
+                        dim 档有效覆盖按 base_op×dim_op 连乘取保守值——新 CSS 基础规则无
+                        opacity、连乘与覆盖两读法等价；旧值实测 base 5%×.55=2.75%→1.06:1、
+                        dim 5%×.3=1.5%→1.03:1）；
+                        c .deco 直接子元素 >2 → **严重**；d stamp/标题字号让位比 <1.3、
+                        e 巨数缺口径注 → 只提示。
   ── 提示（不影响退出码，只打在报告里供人判断）──
   4. 内联硬编码颜色       style 里出现 #rrggbb 的个数（与预设示例教学重叠，误报高）
   7. 辅助色未声明 tone    疑似辅助色元素缺 tone 声明
   8. 单列纵排逃逸        单个列表 ≥4 条且祖先链无分栏信号（版式建议，随页型变化）
   12/13 中的阈值项       强调形态 4-6 种、缺 hl 1-5 个、内联小字 ≤10 处、D-3 节点上限
-  14. 口径自洽            文档宣称的「组数/判据数」vs 源码实数：实际值从源码算（组数=本 docstring
-                        编号最大值、FAIL 面=源码失败追加次数），宣称值从 README/SKILL 抓，
-                        不一致即严重并给 文件:行；0 处宣称跳过比对。
-  ── 撤销说明 ──
+  ── 撤销说明 ──（#14 口径自洽已于 2026-10-24 归位严重区）
   旧版对 #12/#13 采用「只报警不拦截 + 攒够 10 份不同稿件/两周再议转正 + 误报率>10% 退回」机制；
   该机制对**对外发布**的技能包不成立（样本记录只落在使用者的本机，维护者收不到汇总），等于让
   结构性事故永久不设防。故整体撤销：结构性断言直接 FAIL，阈值类断言降为提示；配套的样本计数
   文件与命令行开关一并删除，本脚本不写任何外部文件。
-  2026-10-23 演进（本包定稿）：FAIL/HINT 两级从裁决机制降为信息分级——脚本只出报告，
+  2026-10-23 演进（庆哥拍板）：FAIL/HINT 两级从裁决机制降为信息分级——脚本只出报告，
   exit 1 = 打回信号（重修），不写「命中即不许交付」；处理决定权在使用方。
 """
 import json
@@ -277,7 +290,9 @@ def main():
     #    口径：只判 WARN 不判 FAIL——静态正则拿不到几何，自定义 class 仍会假阴性；
     #    闸门在 SKILL.md 6.5 清单（WARN 必须处理不得放行），两者分工不可合并。
     #    页码口径：N 为「内容页序号」（封面无 body-area），对应全 deck 的 P{N+1}。
-    LAYOUT_CLS = re.compile(r'(^|[\s-])(grid|grid-\d|cols|col-\d|two-col|split|rank-item|asset-cell|flex|row)([\s-]|$)')
+    #    2026-10-24 补：底盘自带的 .duo/.col 双栏组件此前不在信号表里——真产物用它排两栏，
+    #    仍被判「单列纵排逃逸」（FDE SOP 实测 5 处误报）。分栏信号必须认自家组件。
+    LAYOUT_CLS = re.compile(r'(^|[\s-])(grid|grid-\d|cols|col|col-\d|duo|two-col|split|rank-item|asset-cell|flex|row)([\s-]|$)')
     LAYOUT_STY = re.compile(r'(display\s*:\s*(flex|grid)|grid-template-columns|flex-direction\s*:\s*row)')
     VOID_TAGS = {'br', 'img', 'input', 'hr', 'meta', 'link', 'path', 'circle', 'rect', 'line', 'use'}
 
@@ -835,6 +850,126 @@ def main():
     if _drifts:
         fails.append("；".join(_drifts))
 
+    # ===== 15. 封面断言（2026-10-24 立，真源 decoration-vocab §五封面构图总纲） =====
+    #     治「平庸封面交卷」（AI投毒首版病历：徽标+两行标题+一条线+副题，无视觉事件，权限全开也没用）。
+    #     a) 视觉事件三证据（FAIL）：封面（第一个 section.slide）占其一即过——stamp 级语义数字
+    #        （.stamp-num/.cm-v）/ .has-metrics+.cover-metrics / .dv- 装置标记（类名前缀或 data-device）。
+    #        全缺 = 平庸封面。纯大标题不算数（庆哥拍板：标题字号再大不构成视觉事件）。
+    #     b) 装饰可见度（FAIL）：.deco .grid/.scan 线色 color-mix 百分比 × opacity 对 --bg 的
+    #        有效对比度 <1.1:1 = 隐身（dim 档 grid 深底 1.03:1 实测 bug 即此抓法——调浓不删）。
+    #     c) 装饰件数（FAIL）：.deco 容器直接子元素 >2 = 违「一页装饰 ≤2 件」。
+    #     d) 焦点让位（提示）：.stamp-num 与 .cover-title 同在封面且 CSS 字号比 <1.3 = 让位不足。
+    #     e) 口径注（提示）：检出 .stamp-num 但无 .stamp-pre/.stamp-axis/.cm-l 伴随。
+    cover_event = None
+    if pages:
+        _cov_attrs, _cov_inner = pages[0]
+        _cov_cls = set(re.findall(r'class\s*=\s*["\']([^"\']+)', _cov_attrs))
+        _cov_cls |= set(c for _t, a in tags(_cov_inner) for c in (a.get("class") or "").split())
+        _has_stamp = bool(_cov_cls & {"stamp-num", "cm-v"})
+        _has_metrics = "has-metrics" in _cov_cls and "cover-metrics" in _cov_cls
+        _has_dv = any(c.startswith("dv-") for c in _cov_cls) or any("data-device" in a for _t, a in tags(_cov_inner))
+        cover_event = {"stamp": _has_stamp, "metrics": _has_metrics, "dv": _has_dv}
+        result["cover_visual_event"] = cover_event
+        if not (_has_stamp or _has_metrics or _has_dv):
+            fails.append("平庸封面：视觉事件证据全缺（无 stamp 级数字 / 无 .has-metrics+.cover-metrics / "
+                         "无 .dv- 装置标记）→ 按 decoration-vocab §五：排版装置（stamp 巨数/编辑语法）"
+                         "为默认经营项，纯大标题不算视觉事件")
+        if _has_stamp and "cover-title" in _cov_cls:
+            def _rule_fs(cls):
+                for sel, bd, _s, _e in brace_blocks(css_nc):
+                    if re.search(r'\.%s\b' % cls, sel):
+                        m = re.search(r'font-size\s*:\s*([\d.]+)px', bd)
+                        if m:
+                            return float(m.group(1))
+                return None
+            _fs_stamp, _fs_title = _rule_fs("stamp-num"), _rule_fs("cover-title")
+            if _fs_stamp and _fs_title and _fs_stamp / max(_fs_title, 1) < 1.3:
+                hints.append("封面焦点让位疑似不足：stamp %gpx vs 标题 %gpx（<1.3 倍）——"
+                             "stamp 当主角时标题应退档（AI投毒标本 228→104）" % (_fs_stamp, _fs_title))
+        if "stamp-num" in _cov_cls and not (_cov_cls & {"stamp-pre", "stamp-axis", "cm-l"}):
+            hints.append("封面巨型数字缺口径注（.stamp-pre/.stamp-axis/.cm-l 皆无）→ "
+                         "钩子四约束第 2 条：数字必带口径（「2分钟」必带「从发布到被采纳」）")
+    # b) 装饰可见度：deck 实际使用的 .deco 词条对底色算有效对比度（复用 11a 的 _ratio/_tok/bgc）
+    #    使用前提（2026-10-24 复查补）：body 没挂 .deco / 没用对应词条时不判——CSS 里留着旧参数
+    #    词条规则 ≠ 页面用了它，不设前提会把「不用装饰的合法 deck」与存量旧稿永久判红。
+    #    dim 档按连乘取保守值：有效 opacity = 基础规则 op × dim 规则 op（新 CSS 基础规则
+    #    无 opacity=1，连乘与覆盖两读法数值等价；旧稿两级都有 opacity 时连乘更低、防高估可见度）。
+    deco_invis = []
+    _body_cls = set()
+    for _cm in re.finditer(r'class\s*=\s*["\']([^"\']+)["\']', body):
+        _body_cls |= set(_cm.group(1).split())
+    _deco_dim_used = any(
+        "deco" in _cs and "dim" in _cs
+        for _cs in (m.group(1).split() for m in re.finditer(r'class\s*=\s*["\']([^"\']+)["\']', body)))
+    if bgc and "deco" in _body_cls:
+        _ink3 = _tok('--ink')
+        _base_op, _dim_op, _pcts = {}, {}, {}
+        for sel, bd, _s, _e in brace_blocks(css_nc):
+            _w = re.search(r'\.deco(\.dim)?\s+\.(grid|scan)\b', sel)
+            if not _w:
+                continue
+            _m = re.search(r'opacity\s*:\s*([\d.]+)', bd)
+            _op = float(_m.group(1)) if _m else 1.0
+            if _w.group(1):                    # .deco.dim 词条规则：只带 opacity 折扣
+                _dim_op[_w.group(2)] = _op
+            else:                              # 基础规则：opacity + color-mix 浓度
+                _base_op[_w.group(2)] = _op
+                _pcts[_w.group(2)] = [float(_p) for _p in re.findall(r'color-mix\([^{};]*?([\d.]+)\s*%', bd)]
+        for _kind in ("grid", "scan"):
+            if _kind not in _body_cls or _kind not in _base_op:
+                continue                       # 页面没用该词条 / CSS 未定义：不判
+            for _p in _pcts[_kind]:
+                if not _ink3:
+                    break
+                for _sfx, _op in (("", _base_op[_kind]),
+                                  ("（dim）", _base_op[_kind] * _dim_op.get(_kind, 1.0))):
+                    if _sfx and not _deco_dim_used:
+                        continue
+                    _alpha = (_p / 100.0) * _op
+                    _cr = round(_ratio((*_ink3[:3], _alpha), bgc), 2)
+                    if _cr < 1.1:
+                        deco_invis.append("%s%s 有效覆盖 %.1f%%（对比度 %.2f:1 <1.1 隐身）"
+                                          % (_kind, _sfx, _alpha * 100, _cr))
+    deco_invis = list(dict.fromkeys(deco_invis))   # 同词条同数值只报一次（双渐变线不双报）
+    result["deco_invisible"] = deco_invis
+    for s in deco_invis[:3]:
+        fails.append("装饰隐身：%s → 调浓词条参数（mix 百分比或 opacity），不是删装饰——"
+                     "「设计上算数」的前提是看得见" % s)
+    # c) 装饰件数：.deco 容器直接子元素 ≤2
+    #    2026-10-24 复查修：class 精确分词（防 deco-wrap/deco-stage 误计）+ 统计任意标签（不只 div）
+    deco_over = []
+    for m in re.finditer(r'<(\w+)[^>]*class\s*=\s*["\']([^"\']+)["\'][^>]*>', body):
+        if "deco" not in m.group(2).split():
+            continue
+        _tag = m.group(1)
+        _seg = body[m.end():]
+        _depth, _pos = 1, 0
+        for _t in re.finditer(r'<%s\b|</%s>' % (_tag, _tag), _seg):
+            _depth += 1 if _t.group(0).startswith('<' + _tag) else -1
+            if _depth == 0:
+                _pos = _t.start()
+                break
+        _inner = _seg[:_pos]
+        # void 元素（img/br/hr 等无闭合标签）计件但不增深度——深度只增不减会把
+        # 后续真子元素全部漏计（2026-10-24 审核实测：.deco 内 <img>+2×<div> 真 3 件报 0 件）
+        _VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+                 "link", "meta", "param", "source", "track", "wbr"}
+        _cnt, _d = 0, 0
+        for _t in re.finditer(r'<(\w+)[^>]*>|</(\w+)>', _inner):
+            if _t.group(1):
+                if _d == 0:
+                    _cnt += 1
+                if _t.group(1).lower() not in _VOID:
+                    _d += 1
+            else:
+                _d -= 1
+        if _cnt > 2:
+            deco_over.append(_cnt)
+    result["deco_child_over"] = deco_over
+    if deco_over:
+        fails.append("装饰件数超限：.deco 容器直接子元素 %s（>2）→ 违「一页装饰 ≤2 件」"
+                     % "、".join(map(str, deco_over[:3])))
+
     result["fails"] = fails
     result["hints"] = hints
     result["warns"] = hints          # 兼容旧键名：语义已改为「提示」，不参与判定
@@ -876,6 +1011,13 @@ def main():
              result["decl_count"], len(result["consistency_drifts"])))
     if not result["decl_count"]:
         print("口径自洽：文档未出现数字宣称，跳过比对")
+    _ce = result.get("cover_visual_event")
+    print("封面断言（#15）：视觉事件 %s｜装饰隐身 %d 处｜装饰件数超限 %d 处"
+          % (("stamp√ " if _ce["stamp"] else "") + ("metrics√ " if _ce["metrics"] else "")
+             + ("dv√" if _ce["dv"] else "") if _ce and (_ce["stamp"] or _ce["metrics"] or _ce["dv"])
+             else ("全缺（平庸封面）" if _ce else "未检出封面页"),
+             len(result.get("deco_invisible", [])),
+             len(result.get("deco_child_over", []))))
     for s in result["glow_border_important"][:3]:
         print("   ·", s)
     print()

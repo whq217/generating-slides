@@ -309,7 +309,7 @@ body { font-family: var(--font-sans); color: var(--ink); }
 /* ============================================================
    装饰层词汇（2026-10-23 立，demo-deck 五页验证后入盘）
    ------------------------------------------------------------
-   容器 .deco（core.css）+ 下列词条。两条铁律（2026-10-23 立）：
+   容器 .deco（core.css）+ 下列词条。两条铁律（庆哥 2026-10-23 立）：
    ① 颜色一锅汤——全片一个色调家族（--deco-tint 承载），禁引第二家族；
      语义色 --warn 只落内容不进装饰
    ② 装饰一套词——全片同一形态语言：签名词汇（atmos/grid/scan/sweep/band）
@@ -325,14 +325,14 @@ body { font-family: var(--font-sans); color: var(--ink); }
     radial-gradient(720px 480px at 6% 2%, color-mix(in srgb, var(--deco-tint) 5%, transparent), transparent 70%),
     linear-gradient(160deg, color-mix(in srgb, var(--ink) 4%, var(--bg)), var(--bg) 52%, color-mix(in srgb, black 18%, var(--bg))); }
 /* 词条·技术网格 grid（隐喻底：产业测距网） */
-.deco .grid { position: absolute; inset: 0; opacity: .55;
+.deco .grid { position: absolute; inset: 0;
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) var(--deco-line), transparent var(--deco-line)),
-    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) var(--deco-line), transparent var(--deco-line));
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 12%, transparent) var(--deco-line), transparent var(--deco-line)),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 12%, transparent) var(--deco-line), transparent var(--deco-line));
   background-size: var(--deco-cell) var(--deco-cell); }
 /* 词条·扫描线纹理 scan（横纹细密底，克制度最高） */
-.deco .scan { position: absolute; inset: 0; opacity: .55;
-  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--ink) 3%, transparent) 0, color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px, transparent 4px); }
+.deco .scan { position: absolute; inset: 0;
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--ink) 10%, transparent) 0, color-mix(in srgb, var(--ink) 10%, transparent) 1px, transparent 1px, transparent 4px); }
 /* 词条·动效扫描 sweep（横光带自顶向下巡扫，动效签名） */
 .deco .sweep { position: absolute; left: 0; right: 0; height: 2px; top: 0;
   background: linear-gradient(90deg, transparent, var(--deco-tint), transparent);
@@ -350,7 +350,8 @@ body { font-family: var(--font-sans); color: var(--ink); }
 .deco .device i:nth-child(5) { height: 40%; } .deco .device i:nth-child(6) { height: 78%; }
 .deco .device i:nth-child(7) { height: 55%; } .deco .device i:nth-child(8) { height: 92%; }
 /* 浓淡两档：内容页 .dim（签名淡用）/ 收尾 .soft（装置淡版呼应） */
-.deco.dim .grid { opacity: .3; }
+.deco.dim .grid { opacity: .55; }
+.deco.dim .scan { opacity: .55; }
 .deco.dim .atmos { opacity: .7; }
 .deco.soft .device { opacity: .2; }
 @media (prefers-reduced-motion: reduce) { .deco .sweep { animation: none; opacity: .06; } }
