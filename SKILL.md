@@ -4,7 +4,7 @@ slug: generating-slides
 displayName: 网页幻灯片制作专家
 display_name: 网页幻灯片制作专家
 display_name_en: Web Slide Deck Expert
-version: 1.6.3
+version: 1.6.4
 author: 庆哥聊AI
 copyright: Hongqing W
 license: MIT
@@ -81,7 +81,7 @@ compatibility: "生成期零外部依赖（纯静态单文件）。机验：Chro
 
 ## 工作流程
 
-严格按照以下 **7 个阶段** 顺序执行，每个阶段等待用户确认后再进入下一阶段（阶段 0 为可选前置、6.5 为阶段 6 的机验子步；含交付共 8 个确认停点——「七阶段」是流程名号）。
+严格按照以下 **7 个阶段** 顺序执行，每个阶段等待用户确认后再进入下一阶段（阶段 0 为可选前置、6.5 为阶段 6 的机验子步；含交付共 8 个确认停点——「七阶段」是流程名号）。**已有产物的局部修改不进本流程**：改稿轮次＝只动指定页 / 只换配色，不重跑阶段 1-5，走 [references/iterative-edit.md](references/iterative-edit.md)（改完复跑同页 measure-layout 与 verify-consistency）。
 
 ### 阶段0：读取项目规则（可选，先于其他阶段）
 
@@ -309,6 +309,7 @@ compatibility: "生成期零外部依赖（纯静态单文件）。机验：Chro
 - 结构约定：`references/`（读进上下文的知识）、`assets/`（复制进产物）、`scripts/`（直接执行）、`samples/`（机验门禁：`good/chassis.html` 正样本兼补丁基座 + `patches.json` 负样本行级补丁，`build_samples.py` 现场生成、`expected.json` 给期望；**负样本不随包分发全文**，加负样本时 patches.json 与 expected.json 必须同步）四分类
 - **README 同步闸**：凡轮次涉及 SKILL.md 结构性变更（流程/交互/目录/文件清单），轮次收尾必查 README.md 是否需同步——与「改完必跑 build-chassis」同级肌肉记忆（根因：README 曾停旧版 47 轮无人触发更新）
 - **同类错误全扫制**：用户指出一处错误 → 修该处 → **立即全 deck/全包扫同类**（`python scripts/check-deck.py <产物>` 跑单位/SVG着色/y 越界/字号档位四类）→ 可断言的进机验。**主动决策不等指**：错误修复的半径由 AI 判断执行，不是用户揪一耳改一处
+- **常驻落点规则（2026-10-26 立）**：新规则只有两种合法写法——必须常驻的行为约束 → NEVER 速查加一行（本体一句＋指针），其余一律落 `references/` 并在对应阶段加触发指针；**阶段正文禁内联事故原文/理由/松绑史**（参照原则 8「60% 反噬史禁令」形态，正文只留边界短语）。已内联的存量不动，等真实误判再处理
 
 ## 来源与许可
 
