@@ -34,7 +34,7 @@ import sys
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 CORE_FIELDS = ["name", "slug", "displayName", "version", "author",
                "license", "summary", "description", "tags"]
-OPEN_FIELDS = ["description_zh", "description_en"]
+OPEN_FIELDS = ["description_zh", "description_en", "display_name", "display_name_en"]
 results = []
 
 

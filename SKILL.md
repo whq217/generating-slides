@@ -2,6 +2,8 @@
 name: generating-slides
 slug: generating-slides
 displayName: 网页幻灯片制作专家
+display_name: 网页幻灯片制作专家
+display_name_en: Web Slide Deck Expert
 version: 1.6.1
 author: 庆哥聊AI
 copyright: Hongqing W
