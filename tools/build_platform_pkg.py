@@ -204,6 +204,19 @@ def rewrite_readme(text):
         lines = _pat_v1.sub("", _blob, count=1).splitlines()
         ops.append("README: 去掉「与 v1 的关系」节（平台侧无 v1）")
 
+    # 4d) 压缩「更新记录」节
+    #     平台自带「版本历史」页，README 再列一遍是重复；且逐版条目全是维护者语言
+    #     （DSH 必修 / samples 补丁化 / 字节数瘦身），对使用者无意义。
+    #     只保留「仍在维护」这一个有用信号，且不写死版本号与日期，避免过期。
+    _blob = "\n".join(lines)
+    _pat_chg = re.compile(r"^## 更新记录\s*$.*?(?=^## |\Z)", re.S | re.M)
+    if _pat_chg.search(_blob):
+        _blob = _pat_chg.sub(
+            "## 更新记录\n\n持续更新中。逐版明细见平台的「版本历史」页，或仓库的 `git log`。\n\n",
+            _blob, count=1)
+        lines = _blob.splitlines()
+        ops.append("README: 压缩「更新记录」节（平台自带版本历史页）")
+
     # 5) 按节重写「安装」与「许可证」
     text = "\n".join(lines) + "\n"
     for title, body, key in (
