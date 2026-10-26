@@ -51,7 +51,9 @@ EXCLUDE_FILES = {
     "NOTICE",            # 署名声明已在 SKILL.md / README
     ".gitattributes",    # 平台 zip 分发，不经 git 换行转换
     ".gitignore",
-    "README_en.md",      # 英文说明只服务 GitHub 访客, "CHANGELOG.md"}
+    "README_en.md",      # 英文说明只服务 GitHub 访客
+    "CHANGELOG.md",      # 维护工作日志，不进发布包
+}
 EXCLUDE_DIRS = {".git", "tools", "bad", "samples", "__pycache__", ".idea", ".vscode", ".pytest_cache", ".backups"}
 EXCLUDE_EXT = {".pyc", ".pyo", ".orig", ".rej", ".swp", ".tmp", ".log", ".bak"}
 EXCLUDE_NAMES = {".DS_Store", "Thumbs.db"}
