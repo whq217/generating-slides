@@ -34,6 +34,8 @@ It accepts three entry modes: generate from scratch, restructure an existing `.d
 
 > The questions people actually ask. Short answers only — no theory.
 
+**Want to see finished decks first?** The `examples/` folder holds 4 finished decks in different styles — double-click any of them to play.
+
 **Too much text for one slide — will it shrink the font?**
 No. It cuts words or splits the slide instead. Font size never goes down.
 
@@ -180,6 +182,7 @@ v1 (Reveal.js, 1200×700 stage, 19 themes, 30 layouts) was retired from this pac
 
 > Version numbers track content, not publish count: `1.0.0` was the first public release; `1.1.0`–`1.1.2` were internal builds that never shipped; from `1.2.0` on, this repo is the source of record (`1.2.0` is the current published version). Full per-version detail: `git log`.
 
+- **2026-10-26 (v1.6.3)** — README now points readers to the four finished example decks in `examples/` (both in the quick-start section and the file tree).
 - **2026-10-26 (v1.6.2)** — Findability and recoverability; behaviour unchanged. the file table in `SKILL.md` is re-ordered into a "what I want to do → which file to read" locator; a new "dependencies and failure modes" section covers Node / Chrome / playwright (when needed, what happens without them, how to recover) plus how to steer a vague request; uncalibrated thresholds are now explicitly marked "observation only, not an assertion"; added `CHANGELOG.md`, a full end-to-end walkthrough, and an 8-question FAQ written in plain user language.
 - **2026-10-26 (v1.6.1)** — Engineering-hygiene pass from an external review. Backups moved out of the package (`.gitignore` and the gate both exclude them); two `subprocess` calls in `verify-all.py` pinned to UTF-8 so a GBK console no longer garbles failures; a sixth gate step added (behaviour probes — Chrome must make `measure-layout` emit `REPORT::`, playwright must make `crowd-probe` report zero issues, and a missing environment SKIPs instead of failing). Also: bare codename legend, seven-stage counting note, and dead frontmatter keys removed — and `display_name` / `display_name_en` added, since the open platform parses underscore-style keys and a camel-case-only `displayName` failed upload with "missing display name".
 - **2026-10-26 (v1.6.0)** — Three cuts for token economy. `description` trimmed from 600 to 230 characters (product copy and the reader statement moved into the README, WHAT/WHEN/KEYWORDS trigger words kept); the main file slimmed (measure-layout usage and the PDF/Chrome path moved down into `references/`, which is now the single source); a ten-line NEVER quick-reference table added so partial reads during edit rounds cannot miss a prohibition.
