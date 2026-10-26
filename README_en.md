@@ -30,6 +30,37 @@ It accepts three entry modes: generate from scratch, restructure an existing `.d
 - **Slot decision tree:** content logic determines the slot; slots are never invented on the fly.
 - **Automatic animation routing:** content emphasis × mood → a preset package. Restrained by default; the user is not interrogated per animation.
 
+## FAQ
+
+> The questions people actually ask. Short answers only — no theory.
+
+**Too much text for one slide — will it shrink the font?**
+No. It cuts words or splits the slide instead. Font size never goes down.
+
+**I have a style in mind — will it swap in one of its own presets?**
+No. Give it an artefact (a page, a deck, a screenshot, colour values) and it extracts from that. Give it a single word like "techy" and it shows a few options for you to pick — it won't decide for you.
+
+**Can I put images on content slides?**
+Not when it generates. Content slides carry no images by design — charts and diagrams do the job instead.
+It also **cannot create images**: it won't search for them, insert placeholders, or make up an image URL. Cover images come from you; without one it falls back to a pure CSS gradient background.
+If you paste images into the HTML yourself afterwards, that's manual editing — outside its flow.
+
+**Will it run ahead without me?**
+No. It stops at every stage for your go-ahead — style choice, outline, cover preview. Waiting for your reply is not a stall.
+
+**Do I need to install anything for a PDF?**
+No. Press **P** while presenting and print to PDF using the browser's own capability. The headless command is only for batch/offline export.
+
+**Can I edit the result afterwards?**
+Yes. Press **E** to edit in place; it downloads the updated HTML. To change one slide, just name the slide.
+
+**What should I prepare?**
+A sentence or a document. Drop in Word / PDF / PPT if you have them; with only a topic, it searches for real data itself.
+Vague is fine — "I need something for next week's share" — it will ask "do you want a slide deck?" first, then how many slides and who it's for. It won't guess whether you meant a document or a spreadsheet.
+
+**What do I say first?**
+Just describe it: "Make a 12-slide Q3 review deck for management."
+
 ## Install
 
 Install into Claude Code's skills directory. **The directory must be named `generating-slides`**, matching `name` in SKILL.md.
@@ -149,6 +180,7 @@ v1 (Reveal.js, 1200×700 stage, 19 themes, 30 layouts) was retired from this pac
 
 > Version numbers track content, not publish count: `1.0.0` was the first public release; `1.1.0`–`1.1.2` were internal builds that never shipped; from `1.2.0` on, this repo is the source of record (`1.2.0` is the current published version). Full per-version detail: `git log`.
 
+- **2026-10-26 (v1.6.2)** — Findability and recoverability; behaviour unchanged. the file table in `SKILL.md` is re-ordered into a "what I want to do → which file to read" locator; a new "dependencies and failure modes" section covers Node / Chrome / playwright (when needed, what happens without them, how to recover) plus how to steer a vague request; uncalibrated thresholds are now explicitly marked "observation only, not an assertion"; added `CHANGELOG.md`, a full end-to-end walkthrough, and an 8-question FAQ written in plain user language.
 - **2026-10-26 (v1.6.1)** — Engineering-hygiene pass from an external review. Backups moved out of the package (`.gitignore` and the gate both exclude them); two `subprocess` calls in `verify-all.py` pinned to UTF-8 so a GBK console no longer garbles failures; a sixth gate step added (behaviour probes — Chrome must make `measure-layout` emit `REPORT::`, playwright must make `crowd-probe` report zero issues, and a missing environment SKIPs instead of failing). Also: bare codename legend, seven-stage counting note, and dead frontmatter keys removed — and `display_name` / `display_name_en` added, since the open platform parses underscore-style keys and a camel-case-only `displayName` failed upload with "missing display name".
 - **2026-10-26 (v1.6.0)** — Three cuts for token economy. `description` trimmed from 600 to 230 characters (product copy and the reader statement moved into the README, WHAT/WHEN/KEYWORDS trigger words kept); the main file slimmed (measure-layout usage and the PDF/Chrome path moved down into `references/`, which is now the single source); a ten-line NEVER quick-reference table added so partial reads during edit rounds cannot miss a prohibition.
 - **2026-10-25 (v1.5.0)** — Second loosening. The nine diagram recipes become a baseline reference rather than a ceiling (CSS composition preferred, SVG reserved for precise drawing); card quotas replaced by situation judgement; a cover confirmation stop added after the first batch; decorative signatures capped at two by default.

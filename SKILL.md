@@ -4,7 +4,7 @@ slug: generating-slides
 displayName: 网页幻灯片制作专家
 display_name: 网页幻灯片制作专家
 display_name_en: Web Slide Deck Expert
-version: 1.6.1
+version: 1.6.2
 author: 庆哥聊AI
 copyright: Hongqing W
 license: MIT
@@ -35,7 +35,7 @@ compatibility: "生成期零外部依赖（纯静态单文件）。机验：Chro
 ```
 第一层 底盘：版面率   → 密排 ≥60% 面积且宽 ≥80% / 双栏 ≥45% / 单焦点主角块 ≥60% 版心
 第二层 阅读：字号     → 正文地板 22px（1/50 屏高）/ 标题 84px 锁档 / 仪式位 110-140px 闭环反推
-第三层 秩序：分组对齐间距 → 间距三档跟层级树 / 容器阶梯卡>线>留白 / 一页一轴
+第三层 秩序：分组对齐间距 → 间距三档跟层级树 / 容器阶梯卡>线>留白
 ```
 
 **规则全文与机验口径 → [references/layout-rules-v2.md](references/layout-rules-v2.md)（阶段 6 前 MUST 整读全文：禁设行数范围、禁只读小节。阶段 6 除本文 + 槽位路由到的页型文件外，Do NOT 预加载其他 references）**
@@ -90,6 +90,9 @@ compatibility: "生成期零外部依赖（纯静态单文件）。机验：Chro
 > 本技能不依赖该文件即可完整运行；它的全部技术硬约束已内置于本文件与 `references/`。
 
 ### 阶段1：配置
+
+**进门先确认产物（模糊说法才需要）**：用户说法里没有明确产物时——例如「帮我准备一份材料」「下周要分享点东西」——**先用一句话确认「要的是可放映的 PPT 吗」**，确认后再进四问。
+**不要自行拆解用户意图**：别替他判断他要的是文档、表格还是 PPT，也别因为说法模糊就跳过四问直接开工；他不给方向，就给几个具体选项让他点。
 
 使用宿主的**结构化提问**（如 AskUserQuestion）**一次性询问所有配置（合并为 1 次提问）**；宿主没有这类工具时，改用一条消息列编号选项，效果等价：
 
@@ -249,36 +252,50 @@ compatibility: "生成期零外部依赖（纯静态单文件）。机验：Chro
 
 ## 包内文件（按需取用，勿整包读）
 
-技能包加载三层：本文件常驻 → references/ 对应阶段才读 → assets/ 复制即用、scripts/ 直接跑。
+技能包加载三层：本文件常驻 → `references/` 对应阶段才读 → `assets/` 复制即用、`scripts/` 直接跑。
+**先按下表「我要干什么」定位，不要按文件名猜，更不要整包读。**
 
-| 文件 | 何时用 |
+| 我要干什么 / 遇到什么 | 读这个 |
 |---|---|
-| [references/layout-rules-v2.md](references/layout-rules-v2.md) | 阶段 6 前必读：三层规则全文 + 冲突裁决 + 实测证据 |
-| [references/focus-judgment.md](references/focus-judgment.md) | 阶段 3 焦点定档后 + 阶段 6 排版：焦点强调手法八件套 / 视觉重量红线 / 颜色纪律 / 卡片三用法分合 |
-| [references/presets-index.md](references/presets-index.md) | 阶段 5 先读：22 套预设索引 + 2×2 四池路由（物理分离的地图层） |
-| [references/style-presets.md](references/style-presets.md) | 阶段 5：22 套预设规格正文（Grep 直达小节） |
-| [references/decoration-vocab.md](references/decoration-vocab.md) | 阶段 5.3/6：装饰层词汇库——两铁律（颜色一锅汤/装饰一套词）+ 词条表 + 封面构图总纲（hook / 装置 / 数字条 / 四步流程）+ 踩坑记录 |
-| [references/content-preparation.md](references/content-preparation.md) | 阶段 2：提取命令、编码坑、图片筛选 |
-| [references/content-optimization.md](references/content-optimization.md) | 阶段 3：优化原则 + §3.7 焦点判定 |
-| [references/title-copy-types.md](references/title-copy-types.md) | 阶段 3-4：标题文案分型——体裁定配比（A/B/C 档）/ 位置定类型 / 钩子四约束 / 字号身份裁决 |
-| [references/number-typography.md](references/number-typography.md) | 数字页：R1-R6 + 断言 349 清单 |
-| [references/chart-recipes.md](references/chart-recipes.md) | 数据图表页：六类可复制 option + §6 动画时机 |
-| [references/animation-routing.md](references/animation-routing.md) | 阶段 6：类型×氛围 → 动画套餐自动路由 + 三层收敛规则（默认克制档）+ step 叙事纪律 |
-| [references/anim-recipes.md](references/anim-recipes.md) | 机制页：代码动画三问闸门/配额/五配方（按需件，与 effects 类名体系分开） |
-| [references/diagram-patterns.md](references/diagram-patterns.md) | 图示页：九配方 |
-| [assets/diagram-gallery.html](assets/diagram-gallery.html) | 图示九配方（G-01~G-09）的可运行参考实现：改 `:root` 里 `--accent` 一个值，九图全变色（图内零写死色值）；**非交付模板**，只用于看写法 |
-| [references/image-handling.md](references/image-handling.md) | 用户给了图：唯一出口封面 |
-| [references/speaker-mode.md](references/speaker-mode.md) | 讲者窗口行为说明（底盘已内置 S 键，独立窗口+双屏同步+备注卡） |
-| [references/iterative-edit.md](references/iterative-edit.md) | 改稿轮次 |
-| [references/offline-export.md](references/offline-export.md) | PDF/离线 |
-| [assets/chassis-v2.html](assets/chassis-v2.html) | 阶段 6 底盘唯一来源（build 产物禁手改；源码 `assets/chassis/` + `assets/modules/`） |
-| `scripts/build-chassis.mjs` | 改底盘源码/模块后必跑：重建 chassis-v2.html（--no-effects 出精简版） |
-| `scripts/measure-layout.js` | 阶段 6.5 必跑版率+欠填（vacMax/vacBottom）机验（已兼容 `.reveal` 系入场类） |
-| `scripts/crowd-probe.py` | 阶段 6.5 拥挤探针：间距贴死/重叠/行高异常（需 playwright；缺则 SKIP） |
-| `scripts/check-deck.py` | 产物级断言四类：hero-num 单位灰 / SVG 着色（白名单=底盘 `@svg-text` 标记自动提取）/ 文本 y 越界 / **字号档位区间**（越界 8.4–176px 即报；区间内非底盘/规则档位只提示不拦截）（同类错误全扫制配套） |
-| `scripts/extract-pptx.py` | 阶段 2 分支C：.pptx 提取（需 python-pptx） |
-| `scripts/verify-consistency.py` | 静态一致性断言（纯 Python 零依赖）：孤儿类 / 字号地板 / 骨架完整性 / 扫描基数自证；类名基准=底盘 CSS 注册表自动提取（`@critical`/`@hook` 标记，加组件类改底盘即跟，脚本零改动） |
-| `scripts/verify-all.py` | 机验门禁总入口：改解析器/检查器/effects.css 后必跑——build 一致 + 正负样本闸（负样本由 `samples/patches.json` 现场生成、逐份 sha256 自证，含单引号双写法）+ 旧术语零命中 + 样本内嵌 deco 参数 == effects.css |
+| 判断这页该强调谁、怎么强调 | `references/focus-judgment.md` |
+| 选风格（22 套） | `references/presets-index.md`（只读索引；正文 `style-presets.md` Grep 预设名直达，约 1700 行勿全读） |
+| 查某套风格的色板/字体规格 | `references/style-presets.md` |
+| 决定封面怎么构图 | `references/decoration-vocab.md` §五 封面构图总纲 |
+| 挑装饰手法、查装饰踩坑 | `references/decoration-vocab.md` 词条表 + 踩坑记录 |
+| 把数据变成图 | `references/chart-recipes.md` |
+| 用图示讲结构 | `references/diagram-patterns.md`（可运行参考 `assets/diagram-gallery.html`：改 `--accent` 一值九图全变色，非交付模板） |
+| 数字怎么排 | `references/number-typography.md` |
+| 定标题字号与句式 | `references/title-copy-types.md` + `references/layout-rules-v2.md` §2.3 |
+| 版率不达标 / 页面欠填 | `references/layout-rules-v2.md` §1.2–1.3 + 反噬防火墙 |
+| 定间距 / 对齐 / 容器 | `references/layout-rules-v2.md` §3 |
+| 阶段 6 前读规则全文 | `references/layout-rules-v2.md`（此场景必须读全文） |
+| 提取 docx/pptx/PDF 素材 | `references/content-preparation.md`；`.pptx` 用 `scripts/extract-pptx.py`（需 python-pptx） |
+| 优化文案、砍字并页 | `references/content-optimization.md` |
+| 用户给了图（唯一出口是封面） | `references/image-handling.md` |
+| 只改指定页、别的不动 | `references/iterative-edit.md` |
+| 导出 PDF / 离线交付 | `references/offline-export.md` |
+| 讲者窗口 / 备注卡 | `references/speaker-mode.md`（底盘已内置 S 键） |
+| 动画怎么选 | `references/animation-routing.md`；机制页另见 `references/anim-recipes.md` |
+| **依赖报错（Node / Chrome / playwright）** | 下节《依赖与失败场景》 |
+| 阶段 6 底盘 | `assets/chassis-v2.html`（build 产物禁手改；源码在 `assets/chassis/` + `assets/modules/`） |
+| 改底盘后重建 | `scripts/build-chassis.mjs`（需 Node） |
+| 量版率 + 欠填 | `scripts/measure-layout.js`（需 Chrome） |
+| 查拥挤（间距贴死 / 重叠 / 行高） | `scripts/crowd-probe.py`（需 playwright，缺则 SKIP） |
+| 查产物四类断言 | `scripts/check-deck.py`（hero-num 单位灰 / SVG 着色 / 文本 y 越界 / 字号档位区间 8.4–176px） |
+| 静态一致性断言 | `scripts/verify-consistency.py`（纯 Python；孤儿类 / 字号地板 / 骨架完整性 / 扫描基数自证） |
+| 改解析器或 `effects.css` 后验全部 | `scripts/verify-all.py`（build 一致 + 正负样本闸 + 旧术语零命中 + deco 参数对齐） |
+
+## 依赖与失败场景（缺什么会怎样）
+
+三条依赖**缺了都不阻断出稿**，但要按下表处理，别让用户以为技能坏了。
+
+| 依赖 | 什么时候才需要 | 缺了会怎样 | 怎么补 / 怎么跟用户说 |
+|---|---|---|---|
+| **Node.js** | 只有改底盘源码或功能件后重建 `chassis-v2.html` 时才需要；**生成幻灯片完全不需要** | `build-chassis.mjs` 跑不了，现有 `chassis-v2.html` 照常可用 | 无需补，对用户不必提 |
+| **Chrome** | ① `measure-layout.js` 量版率 ② 导出 PDF | 版率机验打印 `[SKIP]` 跳过；PDF 改用手动「打印 → 另存为 PDF」（P 键） | Windows 下 Chrome 常不在 PATH，探测与配置见 `references/offline-export.md`；交付时说明「版率未机验，已人工核对」 |
+| **playwright** | 只有 `crowd-probe.py` 拥挤探针用 | 打印「可选检查未启用」并 exit 0，**不判红、不阻断交付** | 可选增强，不装也能正常出稿；要启用就装 playwright |
+
+**用户说了模糊指令怎么办**：「随便做一下」「你看着办」「简单弄一个」——**不要猜，也不要替他默认风格**。按阶段 1 四问收敛；用户仍不给方向时，给 3 个具体选项让对方点（例：「10 页汇报型 / 5 页概要型 / 20 页详版，选哪个」）。
 
 ## 自信执行规则
 

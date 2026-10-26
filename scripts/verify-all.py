@@ -39,7 +39,7 @@ if shutil.which("node"):
         "" if (r.returncode == 0 and before == after) else "build exit %d / 一致 %s / %s"
         % (r.returncode, before == after, (r.stdout or r.stderr or "")[-120:]))
 else:
-    step("build 重建逐字节一致", True, "SKIP（本机无 node）")
+    step("build 重建逐字节一致", True, "可选未启用（本机没装 Node.js）；不影响出稿")
 
 # ── [2/6] 正样本全绿 ──
 goods = sorted(f for f in os.listdir(os.path.join(SAMPLES, "good")) if f.endswith(".html"))
@@ -155,7 +155,7 @@ try:
     if _i < 0:
         step("measure-layout 行为探针（正样本出 REPORT）", False, "正样本无 </body>")
     elif not _chrome:
-        step("measure-layout 行为探针（正样本出 REPORT）", True, "SKIP（未找到 Chrome，不判红）")
+        step("measure-layout 行为探针（正样本出 REPORT）", True, "可选未启用（本机没找到 Chrome）；版率未机验，不影响出稿")
     else:
         with tempfile.TemporaryDirectory(prefix="verify-probe-") as _td:
             _pp = os.path.join(_td, "probe.html")
@@ -183,7 +183,7 @@ try:
                          capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180)
     _out2 = (_r2.stdout or "") + (_r2.stderr or "")
     if "[SKIP]" in _out2:
-        step("crowd-probe 行为探针（正样本 0 问题）", True, "SKIP（无 playwright，不判红）")
+        step("crowd-probe 行为探针（正样本 0 问题）", True, "可选未启用（本机没装 playwright）；不影响出稿")
     else:
         _ok6 = _r2.returncode == 0 and "0 处问题" in _out2
         step("crowd-probe 行为探针（正样本 0 问题）", _ok6, "" if _ok6 else _out2.strip()[-160:])

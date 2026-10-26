@@ -223,7 +223,8 @@ def main():
         else:
             mv = None
             for line in open(mp, encoding="utf-8", errors="replace"):
-                if re.search(r"version", line, re.I):
+                # 只认表格里的版本字段行（| `version` | 1.6.2 |），避免抓到「versionId 462254」这类引用
+                if re.search(r"\|\s*`?version`?\s*\|", line):
                     mv = ver(line)
                     if mv:
                         break

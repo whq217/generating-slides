@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<!-- ⚠️ 本文件由 scripts/build-chassis.mjs 装配生成（全量装配）——禁手改；改 assets/chassis/ 或 assets/modules/ 后重跑 build -->
+
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>底盘 v2 · 新范式</title>
+<style>
+/* ===== chassis/core.css ===== */
+/* ============================================================
+   底盘 chassis v2 —— 全片唯一，零选择（1920×1080，等比缩放）
+   ------------------------------------------------------------
+   红线注释区（与 references/layout-rules-v2.md 双落点）：
+   ▍第一层 底盘：版面率
+     密排页内容包围盒 ≥60% 面积且宽 ≥80%（锚 75%）
+     双栏短内容页 ≥45%；单焦点页主角块宽 ≥60% 版心
+     达标手段白名单：换纵向/升字号/换轻容器/砍页
+     永禁：加图标、加数据条、拉 gap 凑数（60% 反噬史）
+   ▍第二层 阅读：字号（屏高制 1080 舞台）
+     正文地板 22px（1/50 线）；meta 16px；边注 13px 豁免
+     标题：主张型 84px 全片锁死 / 话题型 72-96 密度带内
+     仪式位主角 110-140px = 目标占版宽(60-85%版心)÷行字数
+     标题:正文 3.8:1-5:1；禁 max-width 防溢钳制，改反推字号
+   ▍第三层 秩序：分组/对齐/间距
+     间距档位跟层级树：板块间 64-72 / 组间 28-32 / 条目 14-18
+     相邻档比 ≥2:1；禁等距；gap 管亲疏 padding 管呼吸
+     容器阶梯：盒>线(发丝线/顶线卡)>留白选最轻够用；默认无盒，出卡自证四场景（focus-judgment §二）
+     一页一左轴；居中仅仪式位；禁垂直居中缩团（分布铺满）
+     负例禁令：token 外无渐变/无阴影/无圆角（--radius- 与 --shadow- 两族 token 默认 0/none，风格配方显式开启才生效）；无第二字体/数字无色块
+   ============================================================ */
+:root {
+  --bg: #101418;
+  --ink: #E9E7E2;
+  --ink-dim: #9AA0A8;
+  --accent: #E8A33D;
+  --hairline: rgba(233, 231, 226, 0.16);
+  --line-struct: rgba(233, 231, 226, 0.45);  /* 结构线专用（≥3:1）：图表网格/轴线/层级连线/天平底座等投影上必须可见的线用这个；--hairline 是装饰档（≈1.3:1）只做分隔美化，投影会隐——0-23 立 */
+  --warn: var(--accent);  /* 语义辅助色（警示/风险/负面/数据对比）——无机械派生规则，风格配方按对主题色的理解指定并写一句理由；未指定时退回 accent。只落内容（数字/文字），禁进装饰 */
+  /* 装饰层 token（.deco 专用，2026-10-23 立）：装饰颜色只吃 var() 链派生，禁写死 hex */
+  --deco-tint: var(--accent);   /* 装饰母色=全片色调家族（颜色一锅汤） */
+  --deco-x: 78%; --deco-y: 86%; --deco-size: 1000px;  /* 光斑位置/尺寸 */
+  --deco-cell: 96px; --deco-line: 1px;  /* 网格单元/线宽 */
+  /* 负面清单开口子：默认全关（0/none 外观与原版一致），风格配方开启才生效 */
+  --radius-card: 0px;
+  --shadow-card: none;
+  /* 中英双名栈：中文 Windows 只认本地化族名（思源黑体 CN/宋体），纯英文名会落到单字重 Heavy 或混排（0-23 修复）。
+     字重层级依赖本机装多字重；仅装 Heavy 单字重时 400/600 同形，层级改用颜色/字号扛，勿只靠 font-weight */
+  --font-sans: "Noto Sans SC", "思源黑体 CN", "PingFang SC", "Microsoft YaHei", "微软雅黑", sans-serif;
+  --font-serif: "Noto Serif SC", "思源宋体 CN", "Source Han Serif SC", "华文中宋", "SimSun", "宋体", serif;
+  /* 字号阶梯（密度-字号表见 layout-rules-v2 §2.2） */
+  --fs-title: 84px;      /* 内容页标题：主张型锁死，话题型 72-96 密度带 */
+  --fs-quote: 140px;     /* 仪式位主角：短行档（7-8字/行）；长行 112 */
+  --fs-num-hero: 176px;  /* 焦点数字 */
+  --fs-num: 92px;        /* metric 大数 */
+  --fs-sub: 30px;        /* 行组小标题 */
+  --fs-body: 24px;       /* 正文（地板 22） */
+  --fs-punch: 32px;      /* 压轴行 */
+  --fs-meta: 16px;       /* meta 档 */
+  --fs-marg: 13px;       /* 边注豁免档 */
+  /* 间距档位（N 层 N 档，禁等距） */
+  --s-in: 14px;          /* 档3 条目间 */
+  --s-mid: 28px;         /* 档2 组间 */
+  --s-out: 64px;         /* 档1 板块间 */
+  --s-line: 24px;        /* 行组行距（高密度可收 20） */
+  --pad-v: 84px;
+  --pad-h: 136px;
+}
+/* 色板三选（第 3 步三风格样张用：加在 <body> 上，如 <body class="palette-b">；结构不变只换色）*/
+.palette-b { --bg:#F7F4EE; --ink:#1C1A17; --ink-dim:#8A8478; --accent:#A6521F; --hairline:rgba(28,26,23,.16); --line-struct:rgba(28,26,23,.45); }  /* B 纸白编辑：暖米白+墨黑+赭橙（Monocle 杂志感） */
+.palette-c { --bg:#0B1E2D; --ink:#EAF1F5; --ink-dim:#8FA5B5; --accent:#E85D3D; --hairline:rgba(234,241,245,.16); --line-struct:rgba(234,241,245,.45); }  /* C 蓝黑瑞士：深海军+信号橙（高对比冷静） */
+/* A 深色工业为默认（不加类）：#101418 底+琥珀 accent */
+/* 类名注册表（2026-10-23 M1 立，机检自动提取——检查器禁手抄名单）：
+   加组件类 = 在其定义块体首打 @critical（漏搬即严重）/ @hook（无定义亦合法，动画件）
+   / @svg-text（SVG 文字免显式 fill）标记注释；归属 = 选择器最右分段的类名。
+   无 CSS 定义或选择器形态提取不到的类，登记在下行声明里。改底盘即自动跟。 */
+/* @critical-declared: chart */
+/* hook 声明行分组（维护必读）：三类混装——①纯 JS/状态钩子（reveal/active/show 等，无 CSS 定义）
+   ②spot-group（仅后代选择器形态，行内标记够不着）③末尾 4 个 = v1 遗留类（slide-title/
+   slide-head/slide-body/cover-subtitle）：孤儿检查放行、拦截在 S8 指纹，禁删——删了 v1 归档稿
+   会误报致命孤儿。动画件类（bar/line/dot/step）走 effects.css 行内标记，不在此行。 */
+/* @hook-declared: reveal slides slide fragment visible impact stagger present hl tone-alt hl--alt active edit-mode cover-active scrollable show speaker-notes no-print current past future spot-group slide-title slide-head slide-body cover-subtitle */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; background: var(--bg); overflow: hidden; }
+body { font-family: var(--font-sans); color: var(--ink); }
+
+.stage { width: 1920px; height: 1080px; position: absolute; top: 50%; left: 50%; transform-origin: center center; }
+/* 0-24 修：放映态禁选字（防划过大数字留选区、配合翻页守卫改造）；E 编辑态豁免仍可选可复制 */
+body:not(.edit-mode) .stage { user-select: none; -webkit-user-select: none; }
+
+/* 页骨架：kicker → 标题 → 内容区 → 边注四件套（frame pre-printed 零动画） */
+.slide { position: absolute; inset: 0; display: none; padding: var(--pad-v) var(--pad-h) 64px; }
+.slide.active { display: flex; flex-direction: column; }
+
+/* ── 装饰层容器 + 内容包裹层（2026-10-23 立，demo-deck 五页验证）──
+   用装饰的页：slide 首子元素挂 .deco（词汇见 effects.css 装饰章节），其余内容全部包进 .content。
+   .content 必须 z:1 永压装饰（z-index:-1 方案已实测不可行——stage transform 下装饰被 body 背景吃掉）。
+   不用装饰的页：内容直挂 slide（旧骨架不变，零破坏）。 */
+.deco { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.content { position: relative; z-index: 1; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.ritual .content { justify-content: center; align-items: flex-start; width: 100%; height: 100%; }  /* 仪式位居中在 .content 上兑现（slide 级被包裹层吃掉）；width/height 必填——缺则 fit-content 收缩，居中失效+通栏件只画到最长行（0-23 修复）*/
+.ritual.center .content { align-items: center; text-align: center; }
+.slide.has-metrics .content { justify-content: center; padding-bottom: 96px; }  /* 数据型封面三段式：标题块中偏上+数字条上提，禁与纯居中混用（重心偏下/顶空实测病） */
+.kicker { /* @critical */ font-size: var(--fs-meta); letter-spacing: 6px; color: var(--accent); font-weight: 600; }
+.head { /* @critical */ margin-top: 18px; }
+.head h2 { font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 600; letter-spacing: 0.02em; line-height: 1.18; }
+.body-area { /* @critical */ flex: 1; display: flex; flex-direction: column; justify-content: flex-start; margin-top: var(--s-out); min-height: 0; }
+.folio { position: absolute; top: 84px; right: 136px; font-size: var(--fs-marg); color: var(--ink-dim); letter-spacing: 2px; }
+.footmark { position: absolute; bottom: 56px; left: 136px; font-size: var(--fs-marg); color: var(--ink-dim); letter-spacing: 3px; }
+.footmark::before { content: ""; display: inline-block; width: 28px; height: 1px; background: var(--hairline); vertical-align: middle; margin-right: 12px; }
+.corner-note { position: absolute; bottom: 96px; right: 136px; font-size: var(--fs-meta); color: var(--ink-dim); }
+
+/* 槽位①：行组（主力——围绕论点的论据，无盒，金点+小标题+正文） */
+.row-group { display: flex; flex-direction: column; gap: var(--s-line); flex: 1; }
+.row { /* @critical */ flex: 1; align-items: center; display: flex; gap: 40px; padding: 22px 0; border-top: 1px solid var(--hairline); }
+.row:first-child { border-top: none; }
+.row .no { font-family: var(--font-serif); font-size: 26px; color: var(--accent); min-width: 64px; font-variant-numeric: tabular-nums; }
+.row .rt { font-size: var(--fs-sub); font-weight: 600; min-width: 280px; }
+.row .rd { font-size: var(--fs-body); color: var(--ink-dim); line-height: 1.6; flex: 1; }
+.row .rd strong { color: var(--ink); font-weight: 600; }
+
+/* 槽位②：双栏对比（hairlines over boxes：中缝发丝线，非卡片） */
+.duo { /* @critical */ display: flex; gap: 0; flex: 1; min-height: 0; }
+.duo .col { flex: 1; padding-right: 72px; display: flex; flex-direction: column; }
+.duo .col + .col { border-left: 1px solid var(--hairline); padding-left: 72px; padding-right: 0; }
+.duo h3 { font-family: var(--font-serif); font-size: 40px; font-weight: 600; margin-bottom: var(--s-mid); }
+.duo h3 .tag { font-family: var(--font-sans); font-size: var(--fs-meta); color: var(--accent); letter-spacing: 4px; display: block; margin-bottom: 14px; }
+.duo ul { list-style: none; display: flex; flex-direction: column; gap: 14px; flex: 1; justify-content: flex-start; }
+.duo li { font-size: var(--fs-body); line-height: 1.6; color: var(--ink-dim); padding: 14px 0 14px 26px; position: relative; }
+.duo li::before { content: ""; position: absolute; left: 0; top: 16px; width: 8px; height: 8px; background: transparent; border: 1px solid var(--accent); }
+.duo li strong { color: var(--ink); font-weight: 600; }
+
+/* 压轴行（内容定形态：金句级收束 A 案 / 普通收束 B 案 16px 灰） */
+.punch { /* @critical */ margin-top: auto; margin-bottom: 8px; padding-top: 28px; border-top: 2px solid var(--accent); font-family: var(--font-serif); font-size: var(--fs-punch); font-weight: 600; letter-spacing: 0.02em; }
+.punch .acc { color: var(--accent); }
+.punch .wrn { color: var(--warn); }  /* 压轴行风险词语义色 */
+
+/* 槽位③：焦点数字（低密度页——主从纵排贴身，说明在数字下方） */
+.hero-num-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; flex: 1; justify-content: center; }
+.hero-num { /* @critical */ font-family: var(--font-serif); font-size: var(--fs-num-hero); font-weight: 600; line-height: 0.9; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.hero-num small { font-size: var(--fs-body); font-weight: 400; color: var(--ink-dim); margin-left: 8px; letter-spacing: 0.06em; }  /* 单位退档=正文字号（周围退档律，不随数字染色） */
+.hero-cap { font-size: var(--fs-body); color: var(--ink-dim); }
+.metric-row { display: flex; gap: var(--s-out); margin-top: var(--s-out); }
+.metric { /* @critical */ flex: 1; border-top: 1px solid var(--hairline); padding-top: 18px; }
+.metric .mv { font-family: var(--font-serif); font-size: var(--fs-num); font-weight: 600; font-variant-numeric: tabular-nums; }
+.metric .mv small { font-size: 0.4em; font-weight: 400; color: var(--ink-dim); }
+.metric .ml { font-size: var(--fs-body); margin-top: 16px; }
+.metric .md { font-size: var(--fs-body); color: var(--ink-dim); margin-top: var(--s-in); line-height: 1.5; }
+
+/* 槽位④：仪式位（封面/金句/收尾——居中豁免，主角闭环反推） */
+.ritual { justify-content: center; align-items: flex-start; }
+.ritual.center { align-items: center; text-align: center; }
+.quote-line { font-family: var(--font-serif); font-size: var(--fs-quote); font-weight: 600; line-height: 1.32; letter-spacing: 0.04em; }
+.quote-line.long { font-size: 112px; }  /* 仪式位闭环降档类：9-13 字/行长行用（占版反推 ≈82% 版心），禁 inline 写字号 */
+.quote-line .qa { color: var(--accent); }
+.quote-attr { margin-top: var(--s-out); font-size: var(--fs-meta); color: var(--ink-dim); letter-spacing: 3px; }
+.cover-badge { /* @critical */ font-size: var(--fs-meta); letter-spacing: 8px; color: var(--accent); border: 1px solid var(--accent); padding: 10px 28px; display: inline-block; }
+.cover-title { /* @critical */ font-family: var(--font-serif); font-size: 140px; font-weight: 600; letter-spacing: 0.06em; line-height: 1.2; margin-top: 32px; }
+.cover-rule { /* @critical */ width: 96px; height: 3px; background: var(--accent); margin-top: 20px; }
+.cover-sub { /* @critical */ font-size: 36px; color: var(--ink-dim); margin-top: var(--s-mid); letter-spacing: 0.14em; }
+
+/* 封面数字条（数据汇报型封面变体，2026-10-23 立）：2-4 组关键数字贴底压轴，slide 须同时挂 .has-metrics（三段式）。
+   判定：内容有强数字（数据汇报型）才用，叙事型主题走纯仪式位。数字参与版率（非装饰）。 */
+.cover-metrics { position: absolute; bottom: 170px; left: 136px; z-index: 1; display: flex; gap: var(--s-out); }
+.cover-metrics .cm { border-top: 1px solid var(--hairline); padding-top: 18px; min-width: 210px; }
+.cm-v { font-family: var(--font-serif); font-size: 44px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.cm-v small { font-size: 0.42em; font-weight: 400; color: var(--ink-dim); margin-left: 6px; }  /* 单位退档，不随数字染色 */
+.cm-v.wr { color: var(--warn); }  /* 风险数字语义（与内页 .yy.warn 同一语言） */
+.cm-l { font-size: var(--fs-meta); color: var(--ink-dim); margin-top: 10px; letter-spacing: 2px; }
+
+/* 动画纪律：frame pre-printed, content newly arrived（--d 延迟分层） */
+.rv { opacity: 0; transform: translateY(18px); }
+.active .rv { animation: up 640ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes up { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; animation: none; } }
+.hint { position: absolute; bottom: 56px; right: 136px; font-size: var(--fs-marg); color: var(--ink-dim); letter-spacing: 2px; }
+
+/* ============================================================
+   组件库（2026-10-22 升底盘：实战稿验证后 token 化补齐判定树组件）
+   生成纪律：SVG 文本必须用下列类或显式 fill——SVG 默认黑字，深色底=隐形地雷
+   ============================================================ */
+.hero-split { display: flex; align-items: center; gap: 88px; flex: 1; }
+.hero-side { border-left: 1px solid var(--hairline); padding-left: 56px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.hero-side p { font-size: var(--fs-body); color: var(--ink-dim); line-height: 1.6; }
+.hero-side p b { color: var(--ink); font-weight: 600; }
+
+/* 占比条（构成数据槽位件） */
+.stack { display: flex; height: 118px; margin-top: var(--s-mid); }
+.stack .seg { display: flex; flex-direction: column; justify-content: center; padding-left: 26px; color: var(--bg); }
+.stack .seg.ink { background: var(--ink); }
+.stack .seg.acc { background: var(--accent); color: #fff; }
+.stack .seg .t { font-family: var(--font-serif); font-size: 26px; font-weight: 600; }
+.stack .seg .v { font-size: 21px; opacity: .86; margin-top: 6px; }
+.stack-cap { display: flex; justify-content: space-between; font-size: var(--fs-meta); color: var(--ink-dim); margin-top: 12px; letter-spacing: 1px; }
+
+/* 分段行组（量值并列/双栏清单） */
+.seg-list { display: flex; flex-direction: column; flex: 1; margin-top: 40px; }
+.seg-row { flex: 1; display: flex; align-items: center; gap: 36px; border-top: 1px solid var(--hairline); }
+.seg-row:first-child { border-top: 1px solid var(--ink); }
+.seg-row .nm { font-family: var(--font-serif); font-size: 30px; font-weight: 600; min-width: 240px; }
+.seg-row .vv { font-family: var(--font-serif); font-size: 44px; font-weight: 600; font-variant-numeric: tabular-nums; flex: 0 0 226px; }
+.seg-row .vv small { font-size: 0.42em; font-weight: 400; color: var(--ink-dim); margin-left: 8px; }
+.seg-row .yy { font-family: var(--font-sans); font-size: 24px; color: var(--ink-dim); flex: 0 0 168px; font-variant-numeric: tabular-nums; }
+.seg-row .yy.hi { color: var(--accent); }
+.seg-row .yy.warn { color: var(--warn); }  /* 风险/负面数值语义色（--warn 未指定时=accent，即无第二色） */
+.seg-row .note { font-size: 20px; color: var(--ink-dim); flex: 1; }
+
+/* 图例（图表的备注层：亲密性——组间档与图表拉开，非图表组成部分） */
+.legend { display: flex; gap: 32px; margin-top: var(--s-mid); font-size: var(--fs-meta); color: var(--ink-dim); }
+.legend i { display: inline-block; width: 22px; height: 8px; margin-right: 10px; vertical-align: middle; }
+
+/* 卡片（判定链出口件，2026-10-22 落底盘：默认无盒——R1 顶线卡=线档组标识，出卡须自证四场景之一，见 focus-judgment §二；frontend-slides 蒸馏 R1/R2/R3） */
+.card { /* @critical */ border-top: 2px solid var(--accent); padding: 18px var(--s-mid) 0 0; display: flex; flex-direction: column; align-items: flex-start; }
+.card-title { font-family: var(--font-serif); font-size: var(--fs-sub); font-weight: 600; }  /* 场景 1/2 文字卡标题 */
+.card-num { font-family: var(--font-serif); font-size: var(--fs-num); font-weight: 600; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }  /* R2 第一段：大数字主角（R3：随 --accent 自动随面翻转） */
+.card-num small { font-size: 0.4em; font-weight: 400; color: var(--ink-dim); margin-left: 8px; letter-spacing: 0.06em; }  /* 单位退档=周围退档律，不随数字染色 */
+.card-label { font-size: var(--fs-body); color: var(--ink); font-weight: 600; margin-top: 14px; }  /* R2 第二段：标签贴身 */
+.card-note { font-size: var(--fs-meta); color: var(--ink-dim); letter-spacing: 1px; margin-top: 10px; }  /* R2 第三段：meta 档小注（口径/来源） */
+.card-row { display: flex; gap: var(--s-out); }  /* 多卡并列容器：锁等宽等高（场景 4 规整对齐——异构单元基线不一的治法） */
+.card-row .card { flex: 1; }
+.card-box { border: 1px solid var(--hairline); background: color-mix(in srgb, var(--ink) 4%, transparent); padding: var(--s-mid); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }  /* 盒装变体：仅品牌风格预设点名使用；radius/shadow 走 token（默认 0/none 外观与原版一致；背景改 color-mix 跟 ink 走，palette 切换不再滞留旧色） */
+.card-box.lift { --radius-card: 14px; --shadow-card: 0 24px 56px color-mix(in srgb, var(--bg) 80%, black); }  /* 风格配方开口子载体：挂 .lift 即开圆角+投影（品牌卡场景；非品牌风格禁用） */
+.card.mute { border-top-color: var(--hairline); }  /* 卡组内中性变体（选择性突出第②式）：强调卡走 accent 默认、其余卡 mute 无色——组内只许一张主色卡（强调效力=使用密度的倒数） */
+.card.mute .card-num { color: var(--ink); }
+
+/* 小标题标记（内容组级扫读锚，2026-10-22 落底盘——维护者裁定：序列关系→行组 .no 编号 / 非序列→本标记，二选一禁双前缀；
+   页面级 kicker 管每页 head，本件管页内条目；形态按池：dash 字符=C 科技 / 默认竖块·hollow 空心框=A·B / dot 色点=D 温暖；
+   颜色 accent（默认）或 .dim 二选一，同 deck 统一；emoji 永久禁。纪律全文 → layout-rules-v2 §3.2b */
+.sh-mark { position: relative; padding-left: 0.85em; }
+.sh-mark::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 0.28em; height: 0.62em; background: var(--accent); }  /* 左置默认：实心竖块（几何形） */
+.sh-mark.dash::before { content: "—"; width: auto; height: auto; background: none; font-size: 0.8em; line-height: 1; color: var(--accent); }  /* 字符 glyph（em-dash；斜杠系预设可改 content:"/"） */
+.sh-mark.dot::before { width: 0.5em; height: 0.5em; border-radius: 50%; }  /* 色点 */
+.sh-mark.hollow::before { width: 0.55em; height: 0.55em; background: none; border: 1.5px solid var(--accent); }  /* 空心方框（与 duo bullet 空心框同语言，两级不同形时错开用） */
+.sh-mark.dim::before { background: var(--ink-dim); color: var(--ink-dim); border-color: var(--ink-dim); }  /* 颜色二选一（覆盖各形态） */
+/* 上置版（中轴/居中版式：标记—标题—正文共中轴垂直堆叠；挂在小标题元素上） */
+.sh-mark-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.sh-mark-top::before { content: ""; width: 0.62em; height: 0.28em; background: var(--accent); margin-bottom: 0.35em; }  /* 上置默认：横条 */
+.sh-mark-top.dash::before { content: "—"; width: auto; height: auto; background: none; font-size: 0.8em; line-height: 1; color: var(--accent); }
+.sh-mark-top.dot::before { width: 0.5em; height: 0.5em; border-radius: 50%; }
+.sh-mark-top.hollow::before { width: 0.55em; height: 0.55em; background: none; border: 1.5px solid var(--accent); }
+.sh-mark-top.dim::before { background: var(--ink-dim); color: var(--ink-dim); border-color: var(--ink-dim); }
+
+/* 双栏小节标签 */
+.duo h3 .tag { font-family: var(--font-sans); font-size: var(--fs-meta); color: var(--accent); letter-spacing: 5px; display: block; margin-bottom: 12px; }
+
+/* SVG 图表文本类（全部显式 fill——明度反向律的 SVG 落点；字号梯度：数值>类目名，数字是图内第一阅读点） */
+.chart .cl { /* @svg-text */ font-size: 26px; fill: var(--ink); font-family: var(--font-serif); }
+.chart .cv { /* @svg-text */ font-size: 32px; fill: var(--ink); font-family: var(--font-serif); font-variant-numeric: tabular-nums; }
+.chart .cy { /* @svg-text */ font-size: 21px; fill: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.chart .cy.dn { fill: var(--accent); }
+.chart .cs { /* @svg-text */ font-size: 19px; fill: var(--ink-dim); }
+.chart .bar-val { /* @svg-text */ font-family: var(--font-serif); font-size: 30px; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.chart .axis-lbl { /* @svg-text */ font-size: 22px; fill: var(--ink-dim); }
+.chart .bar-yoy { /* @svg-text */ font-size: 21px; fill: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.chart .bar-yoy.hot { fill: var(--accent); }
+
+
+/* ===== modules/effects.css ===== */
+/* ============================================================
+   图表生长动画（动画件，按需装配；2026-10-21 v2 原生）
+   配方类名驱动，零属性配合。手写 SVG 图表按 chart-recipes §6 类名规范：
+   柱 rect.bar / 折线 path.line / 数据点 circle.dot；
+   网格线/标签不加类名自动静止。--i 可选逐项错开、--d 起步延迟。
+   ============================================================ */
+.active .chart .bar { /* @hook */ transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); animation: chart-grow 800ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: calc(var(--d, 200ms) + var(--i, 0) * 90ms); }
+@keyframes chart-grow { to { transform: scaleY(1); } }
+.active .chart .bar-h { /* @hook */ transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(0); animation: chart-grow-h 800ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: calc(var(--d, 200ms) + var(--i, 0) * 90ms); }
+@keyframes chart-grow-h { to { transform: scaleX(1); } }
+.active .chart .line { /* @hook */ stroke-dasharray: var(--len, 2600); stroke-dashoffset: var(--len, 2600); animation: chart-draw 1100ms ease-out forwards; animation-delay: calc(var(--d, 250ms) + var(--i, 0) * 90ms); }
+@keyframes chart-draw { to { stroke-dashoffset: 0; } }
+.active .chart .dot { /* @hook */ opacity: 0; animation: chart-pop 480ms ease-out forwards; animation-delay: calc(var(--d, 650ms) + var(--i, 0) * 90ms); }
+@keyframes chart-pop { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .active .chart .bar { animation: none; transform: none; }
+  .active .chart .line { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+  .active .chart .dot { animation: none; opacity: 1; }
+}
+
+/* ============================================================
+   动画库扩充（2026-10-21，承 v1 animation-patterns 存档·v2 重写）
+   路由真源 = references/animation-routing.md（按演讲类型/氛围自动配，
+   不逐个问客户）。类名挂上即生效；.rv 默认淡入上滑仍是 90% 场景主力。
+   ============================================================ */
+
+/* —— 封面主角变体（默认走 .rv；两式按氛围路由，替代 .rv 使用） —— */
+.anim-scale { opacity: 0; }
+.active .anim-scale { animation: animScaleIn 700ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes animScaleIn { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
+.anim-blur { opacity: 0; }
+.active .anim-blur { animation: animBlurIn 900ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes animBlurIn { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: blur(0); } }
+
+/* —— 特殊动画（路由表点名单用，不默认） —— */
+.zoom-pop { opacity: 0; }
+.active .zoom-pop { animation: zoomPop 650ms cubic-bezier(0.34,1.56,0.64,1) forwards; animation-delay: calc(var(--d, 350ms) + var(--i, 0) * 90ms); }
+@keyframes zoomPop { 0% { opacity: 0; transform: scale(0.6); } 70% { opacity: 1; transform: scale(1.04); } 100% { opacity: 1; transform: scale(1); } }
+.rise-in { opacity: 0; }
+.active .rise-in { animation: riseIn 760ms cubic-bezier(0.16,1,0.3,1) forwards; animation-delay: var(--d, 0ms); }
+@keyframes riseIn { from { opacity: 0; transform: translateY(44px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+.neon-glow { animation: neonPulse 2.6s ease-in-out infinite; }
+@keyframes neonPulse { 0%, 100% { text-shadow: 0 0 8px var(--accent); } 50% { text-shadow: 0 0 26px var(--accent); } }
+.typewriter { visibility: hidden; }
+.typewriter.tw-on { visibility: visible; }
+.typewriter.tw-on .tw-ch { opacity: 0; animation: twCh 60ms steps(1) forwards; }
+@keyframes twCh { to { opacity: 1; } }
+
+/* —— 背景效果（科技氛围预设专用；纸白/瑞士类排版禁用） —— */
+.bg-grid { background-image: linear-gradient(var(--hairline) 1px, transparent 1px), linear-gradient(90deg, var(--hairline) 1px, transparent 1px); background-size: 56px 56px; }
+.geo-float { position: absolute; border-radius: 50%; opacity: 0.08; background: var(--accent); filter: blur(40px); animation: geoFloat 22s infinite ease-in-out; pointer-events: none; }
+@keyframes geoFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+.particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.4; }
+
+/* ============================================================
+   装饰层词汇（2026-10-23 立，demo-deck 五页验证后入盘）
+   ------------------------------------------------------------
+   容器 .deco（core.css）+ 下列词条。两条铁律（2026-10-23 立）：
+   ① 颜色一锅汤——全片一个色调家族（--deco-tint 承载），禁引第二家族；
+     语义色 --warn 只落内容不进装饰
+   ② 装饰一套词——全片同一形态语言：签名词汇（atmos/grid/scan/sweep）
+     全片贯穿（封面浓=容器默认 / 内页淡=.deco.dim）；
+     基础词条外按 decoration-vocab.md「主题装置」开窗现场定制（装置仅封面/收尾，
+     禁中间内容页乱入；band、device 已废除）
+   一页 ≤2 件；颜色只吃 var() 链 + color-mix 派生，禁写死 hex；
+   装饰参与构图平衡但版率探针不计（measure-layout 已排除 .deco）
+   ============================================================ */
+/* 词条·明暗渐变 atmos（家族底：左上微亮→右下渐暗造深度 + 两团极淡 tint） */
+.deco .atmos { position: absolute; inset: 0;
+  background:
+    radial-gradient(var(--deco-size) 700px at var(--deco-x) var(--deco-y), color-mix(in srgb, var(--deco-tint) 9%, transparent), transparent 66%),
+    radial-gradient(720px 480px at 6% 2%, color-mix(in srgb, var(--deco-tint) 5%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--ink) 4%, var(--bg)), var(--bg) 52%, color-mix(in srgb, black 18%, var(--bg))); }
+/* 词条·技术网格 grid（隐喻底：产业测距网）
+   2026-10-24 浓度校准（封面断言 #15b 实测旧值 5%×.55=2.75% 有效，#111 底 1.06:1 投影即隐身）：
+   提到 12% 不叠 opacity（NEV demo 验证值）；dim 档 .55 打折后仍 ≥1.1:1 可见下限 */
+.deco .grid { position: absolute; inset: 0;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 12%, transparent) var(--deco-line), transparent var(--deco-line)),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 12%, transparent) var(--deco-line), transparent var(--deco-line));
+  background-size: var(--deco-cell) var(--deco-cell); }
+/* 词条·扫描线纹理 scan（横纹细密底，克制度最高）——同日校准 3%→10% */
+.deco .scan { position: absolute; inset: 0;
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--ink) 10%, transparent) 0, color-mix(in srgb, var(--ink) 10%, transparent) 1px, transparent 1px, transparent 4px); }
+/* 词条·动效扫描 sweep（横光带自顶向下巡扫，动效签名） */
+.deco .sweep { position: absolute; left: 0; right: 0; height: 2px; top: 0;
+  background: linear-gradient(90deg, transparent, var(--deco-tint), transparent);
+  opacity: .14; animation: decoSweep 12s linear infinite; }
+@keyframes decoSweep { to { transform: translateY(1080px); } }
+/* 浓淡两档：内容页 .dim（签名淡用）/ 收尾 .soft（主题装置淡版呼应，装置 CSS 由生成端现场定制）
+   2026-10-24 校准：dim grid .3→.55（原折后 1.5% 有效，深底隐身；.55 后 6.6% ≥1.1:1） */
+.deco.dim .grid { opacity: .55; }
+.deco.dim .scan { opacity: .55; }
+.deco.dim .atmos { opacity: .7; }
+@media (prefers-reduced-motion: reduce) { .deco .sweep { animation: none; opacity: .06; } }
+
+/* —— 3D 悬停（品牌风卡片可选；JS 自动扫 .tilt-card） —— */
+.tilt-card { transform-style: preserve-3d; perspective: 1000px; transition: transform 0.15s ease-out; }
+
+/* —— step 叙事（逐步揭示：点击先出完本页 step 再翻页；纪律=组首条不挂，防"翻到即空页"） —— */
+.step { /* @hook */ opacity: 0; transform: translateY(15px); transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+.step.on { opacity: 1; transform: none; }
+.step.impact { opacity: 0; transform: scale(0.85) translateY(10px); transition: opacity 0.6s cubic-bezier(0.34,1.56,0.64,1), transform 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+.step.impact.on { opacity: 1; transform: scale(1) translateY(0); }
+
+/* —— 聚光式 step（并列板块"讲到谁亮谁"：组容器挂 .spot-group，非当前项 .spot-dim 退后；打印定格见 print.css，编辑态全亮） —— */
+.spot-group > * { transition: opacity 0.5s ease; }
+.spot-group .spot-dim { opacity: 0.3 !important; }   /* important 防 .rv forwards 定格压 dim（复检风险项） */
+.edit-mode .spot-group .spot-dim { opacity: 1 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-scale, .anim-blur, .zoom-pop, .rise-in { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+  .neon-glow, .geo-float { animation: none !important; }
+  .step, .step.impact { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .spot-group > * { transition: none !important; }
+  .typewriter { visibility: visible !important; }
+  .typewriter .tw-ch { opacity: 1 !important; animation: none !important; }
+}
+
+
+/* ===== modules/interactions.css ===== */
+/* ============================================================
+   交互三件套样式（基本件）：编辑E / 画笔D / 演讲者S
+   chrome 层，不参与 slide 排版红线
+   （提词 N 面板已移除 2026-10-24：主窗口是投屏观众可见，提词职责归 S 演讲者窗口备注卡）
+   ============================================================ */
+
+/* 画笔 */
+.pen-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 500; pointer-events: none; }
+.pen-canvas.active { pointer-events: auto; cursor: crosshair; }
+
+/* 浮动圆按钮（画笔/演讲者）：token 配色，内联 SVG 零外部依赖 */
+.fab { position: fixed; bottom: 20px; z-index: 1000; width: 44px; height: 44px; border-radius: 50%; background: transparent; border: 1px solid var(--hairline); color: var(--ink-dim); cursor: pointer; opacity: 0.4; transition: all 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; }
+.fab:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+.fab.active { opacity: 1; background: var(--accent); color: #fff; border-color: transparent; }
+.fab svg { width: 18px; height: 18px; display: block; }
+.pen-toggle { right: 20px; }
+.spk-toggle { right: 76px; }
+
+/* 编辑模式：左上热区 + 按钮 */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 10px; left: 10px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10001; background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font-size: 14px; font-family: var(--font-sans); }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-mode .stage .slide [contenteditable="true"] { outline: 1px dashed var(--accent); outline-offset: 2px; cursor: text; min-height: 1em; }
+.edit-mode .stage .slide [contenteditable="true"]:hover { outline-style: solid; }
+
+
+/* ===== modules/print.css ===== */
+/* ============================================================
+   PDF 导出（基本件，2026-10-21 v2 原生）：P 键打印 / headless --print-to-pdf
+   @page 16:9 零边距，每页一张；chrome 全退出；.rv 与图表动画强制定格终值防空白页
+   导出命令：chrome --headless=new --no-pdf-header-footer --virtual-time-budget=6000 --print-to-pdf="out.pdf" "file:///...html"
+   ============================================================ */
+@media print {
+  /* 背景强制保留：Chrome 打印默认丢弃背景色，暗底 deck 会导出成白纸（0-23 修复） */
+  html, body, .slide, .slide * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  html, body { height: auto; background: #fff; overflow: visible; }
+  .slide { background: var(--bg); }  /* 0-25 修复：body 打印时被上行改白，slide 自身无背景则半透明装饰叠白=灰页；给每页发实底 */
+  .stage { position: static; transform: none !important; width: 1920px; height: auto; }
+  .slide { display: flex !important; position: relative; inset: auto; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+  .slide:last-of-type { break-after: auto; page-break-after: auto; }
+  .rv { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .spot-group .spot-dim { opacity: 1 !important; }
+  .chart .bar, .chart .bar-h, .chart .line, .chart .dot { animation: none !important; transform: none !important; opacity: 1 !important; stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+  .pen-canvas, .pen-toggle, .spk-toggle, .edit-hotzone, .edit-toggle, .notes-panel, .hint { display: none !important; }
+  body.notes-on .slide, body.notes-safe .slide { padding-bottom: 64px !important; }  /* 提词安全区复位：print 下面板已隐藏，让位 padding 必须跟着回底盘底值 64px（0-23 修复：否则导出页底部空 288px）*/
+}
+@page { size: 1920px 1080px; margin: 0; }
+
+
+/* ===== 主题覆盖：商务蓝（包内预设）===== */
+:root{
+  --bg:#F8FAFC; --ink:#1E293B; --ink-dim:color-mix(in srgb,var(--ink) 58%,var(--bg)); --accent:#F59E0B; --hairline:#e2e8f0; --warn:#1E3A8A; --deco-tint:#3B82F6;
+}
+:root{
+  --fs-body:24px; --fs-sub:30px; --fs-punch:32px;
+  --font-serif:"Outfit", "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-sans:"Outfit", "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+.head h2{font-weight:700}
+.cov-grid{display:flex;align-items:center;gap:88px;width:100%;flex:1}
+.cov-left{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.cov-right{flex:0 0 440px}
+.cover-title span{display:block}
+.cover-title .l2{color:var(--accent);font-size:112px;line-height:1.05;letter-spacing:0.25em;margin-top:14px}
+.dv-stack{position:relative;width:100%;height:auto}
+.dv-stack .dn{font-family:var(--font-serif);font-size:var(--fs-num-hero);line-height:0.82;letter-spacing:-0.04em;font-variant-numeric:tabular-nums}
+.dv-stack .du{font-size:var(--fs-sub);font-weight:400;color:var(--ink-dim);margin-left:16px;letter-spacing:0.08em}
+.dv-stack .dl{margin-top:18px;font-size:var(--fs-body);color:var(--ink)}
+.row-group{gap:0}
+.row{flex-direction:column;align-items:flex-start;gap:12px;padding:38px 0}
+.row .rhead{display:flex;align-items:baseline;gap:18px}
+.row .no{min-width:0;font-size:var(--fs-sub)}
+.row .rt{min-width:0}
+.row .rd{line-height:1.7}
+.num-rows{display:flex;flex-direction:column;flex:1}
+.nrow{display:flex;align-items:center;gap:56px;padding:40px 0;border-top:1px solid var(--hairline)}
+.nrow:first-child{border-top:none}
+.nrow .nv{font-family:var(--font-serif);font-size:var(--fs-num);font-weight:600;font-variant-numeric:tabular-nums;min-width:300px;line-height:1}
+.nrow .nv small{font-size:0.4em;font-weight:400;color:var(--ink-dim);margin-left:8px}
+.nrow .nl{font-size:var(--fs-sub);font-weight:700}
+.nrow .nd{font-size:var(--fs-body);color:var(--ink-dim);margin-top:10px;line-height:1.7}
+.nrow .nv.wr{color:var(--warn)}
+#p5 .row{flex-direction:row;align-items:center;gap:40px;padding:30px 0}
+#p5 .row .rt{min-width:300px}
+.quote-line span{display:block}
+.quote-line .qa{letter-spacing:0.14em}
+
+/* 装置：深蓝大数字 + 四段步骤条（末段金色）——行动与进度，无卡 */
+.dv-stack .pl{display:contents}
+.dv-stack{display:flex;flex-direction:column;align-items:flex-start}
+.dv-stack .dn{font-weight:700;color:#1E3A8A}
+.dv-stack .dl{color:var(--ink-dim)}
+.dv-stack .dl::after{content:"";display:block;width:100%;height:6px;margin-top:34px;
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--ink) 20%,transparent) 0 22%,
+    color-mix(in srgb,var(--ink) 20%,transparent) 22% 47%,
+    color-mix(in srgb,var(--ink) 20%,transparent) 47% 72%,
+    var(--accent) 72% 100%)}
+
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+<!-- ▍P1 封面 · 仪式位 · 双色分行标题 + 装置叠片 -->
+<section class="slide ritual active" id="p1">
+  <div class="deco"><div class="atmos"></div><div class="dv-arc"></div></div>
+  <div class="content">
+    <div class="cov-grid">
+      <div class="cov-left">
+        <div class="cover-badge rv" style="--d:80ms">方法论 · 演示</div>
+        <h1 class="cover-title rv" style="--d:200ms"><span>怎么用 AI</span><span class="l2">做汇报</span></h1>
+        <div class="cover-rule rv" style="--d:380ms"></div>
+        <p class="cover-sub rv" style="--d:460ms">不是让你少花时间，是让台下看得懂</p>
+      </div>
+      <div class="cov-right rv" style="--d:560ms">
+        <div class="dv-stack">
+          <div class="pl"></div>
+          <div class="pl"></div>
+          <div class="pl"></div>
+          <div class="pl"><div class="dn">4<span class="du">个动作</span></div><div class="dl">一页只说一件事</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="folio">01 / 06</div>
+  <div class="corner-note rv" style="--d:640ms">2026 · 庆哥聊AI</div>
+  <div class="footmark">庆哥聊AI · 怎么用 AI 做汇报 · P 导出 PDF ｜ ← → 翻页</div>
+</section>
+
+<!-- ▍P2 诊断 · 纵向行组三组 + 压轴 -->
+<section class="slide" id="p2">
+  <div class="deco dim"><div class="atmos"></div><div class="dv-arc"></div></div>
+  <div class="content">
+    <div class="kicker rv">01 诊断</div>
+    <div class="head"><h2 class="rv" style="--d:120ms">汇报被说字太多，通常是这三件事</h2></div>
+    <div class="body-area">
+      <div class="row-group">
+        <div class="row rv" style="--d:240ms">
+          <div class="rhead"><span class="no">1</span><span class="rt">一页什么都想说</span></div>
+          <div class="rd">五个论点挤在一页，每段只剩一个标题，台下听完什么也没记住</div>
+        </div>
+        <div class="row rv" style="--d:320ms">
+          <div class="rhead"><span class="no">2</span><span class="rt">字越改越小</span></div>
+          <div class="rd">内容塞不下就缩字号，最后一页四百字，投影上只剩一点点大，后排直接放弃看</div>
+        </div>
+        <div class="row rv" style="--d:400ms">
+          <div class="rhead"><span class="no">3</span><span class="rt">先排版再想内容</span></div>
+          <div class="rd">版式越做越华丽，逻辑反而散了，讲的时候自己都找不到这页重点</div>
+        </div>
+      </div>
+    </div>
+    <div class="punch rv" style="--d:520ms">先确定这页要让人记住什么，再谈排版</div>
+  </div>
+  <div class="folio">02 / 06</div>
+  <div class="footmark">庆哥聊AI · 怎么用 AI 做汇报</div>
+</section>
+
+<!-- ▍P3 体量 · 三行大数字行组 -->
+<section class="slide" id="p3">
+  <div class="deco dim"><div class="atmos"></div><div class="dv-arc"></div></div>
+  <div class="content">
+    <div class="kicker rv">02 体量</div>
+    <div class="head"><h2 class="rv" style="--d:120ms">一页能放多少字</h2></div>
+    <div class="body-area">
+      <div class="num-rows">
+        <div class="nrow rv" style="--d:240ms">
+          <div class="nv">40<small>字</small></div>
+          <div><div class="nl">一句话结论，最舒服</div><div class="nd">观众一眼看完，注意力还在你身上</div></div>
+        </div>
+        <div class="nrow rv" style="--d:340ms">
+          <div class="nv">120<small>字</small></div>
+          <div><div class="nl">有论据支撑，正常</div><div class="nd">三到四行，每行说清一件事</div></div>
+        </div>
+        <div class="nrow rv" style="--d:440ms">
+          <div class="nv wr">200<small>字</small></div>
+          <div><div class="nl">上限，再多就该拆页</div><div class="nd">超过这个数，投影上没人会读完</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="punch rv" style="--d:560ms">这些不是规矩，是投影下的可读边界</div>
+  </div>
+  <div class="folio">03 / 06</div>
+  <div class="footmark">庆哥聊AI · 怎么用 AI 做汇报</div>
+</section>
+
+<!-- ▍P4 图表 · 纵向行组三组 + 压轴 -->
+<section class="slide" id="p4">
+  <div class="deco dim"><div class="atmos"></div><div class="dv-arc"></div></div>
+  <div class="content">
+    <div class="kicker rv">03 图表</div>
+    <div class="head"><h2 class="rv" style="--d:120ms">数据别堆成数字，按关系选图</h2></div>
+    <div class="body-area">
+      <div class="row-group">
+        <div class="row rv" style="--d:240ms">
+          <div class="rhead"><span class="no">1</span><span class="rt">要看趋势怎么走</span></div>
+          <div class="rd">用折线。三个月是涨是跌，一条线的方向比一串数字快得多</div>
+        </div>
+        <div class="row rv" style="--d:320ms">
+          <div class="rhead"><span class="no">2</span><span class="rt">要看构成怎么分</span></div>
+          <div class="rd">用柱状或饼。谁占大头一眼看比例，不用在心里做加法</div>
+        </div>
+        <div class="row rv" style="--d:400ms">
+          <div class="rhead"><span class="no">3</span><span class="rt">要看谁排前面</span></div>
+          <div class="rd">用条形。排序本身就是结论，横向拉长比纵向好读</div>
+        </div>
+      </div>
+    </div>
+    <div class="punch rv" style="--d:520ms">图不是装饰，是替你说完那句"所以呢"</div>
+  </div>
+  <div class="folio">04 / 06</div>
+  <div class="footmark">庆哥聊AI · 怎么用 AI 做汇报</div>
+</section>
+
+<!-- ▍P5 自检 · 纵向行组四组 + 第五问做压轴 -->
+<section class="slide" id="p5">
+  <div class="deco dim"><div class="atmos"></div><div class="dv-arc"></div></div>
+  <div class="content">
+    <div class="kicker rv">04 自检</div>
+    <div class="head"><h2 class="rv" style="--d:120ms">上台前，问自己五句</h2></div>
+    <div class="body-area">
+      <div class="row-group">
+        <div class="row rv" style="--d:220ms">
+          <span class="no">1</span>
+          <div class="rt">这页想让人记住什么</div>
+          <div class="rd">一句话说得出来吗？说不出来，说明这页还没想清楚</div>
+        </div>
+        <div class="row rv" style="--d:290ms">
+          <span class="no">2</span>
+          <div class="rt">三秒能看懂吗</div>
+          <div class="rd">看不懂就是没排好，不是观众水平不够</div>
+        </div>
+        <div class="row rv" style="--d:360ms">
+          <span class="no">3</span>
+          <div class="rt">最后一排看得清吗</div>
+          <div class="rd">看不清就是字号不够，别指望观众凑近看</div>
+        </div>
+        <div class="row rv" style="--d:430ms">
+          <span class="no">4</span>
+          <div class="rt">有没有两页在说同一件事</div>
+          <div class="rd">有就合并，重复比遗漏更消耗注意力</div>
+        </div>
+        <div class="row rv" style="--d:500ms">
+          <span class="no">5</span>
+          <div class="rt">不看稿，能把这页讲完吗</div>
+          <div class="rd">讲不完就是页太多</div>
+        </div>
+      </div>
+    </div>
+    <div class="punch rv" style="--d:560ms">五句全过，才配上台</div>
+  </div>
+  <div class="folio">05 / 06</div>
+  <div class="footmark">庆哥聊AI · 怎么用 AI 做汇报</div>
+</section>
+
+<!-- ▍P6 收口 · 仪式位 · 首尾呼应（装置淡版） -->
+<section class="slide ritual" id="p6">
+  <div class="deco soft"><div class="atmos"></div><div class="dv-arc"></div></div>
+  <div class="content">
+    <div class="kicker rv" style="--d:60ms">收口</div>
+    <h1 class="quote-line rv" style="--d:200ms"><span>AI 不替你想清楚</span><span class="qa">要说什么</span></h1>
+    <p class="cover-sub rv" style="--d:400ms">它负责让说出来的东西站得住</p>
+  </div>
+  <div class="corner-note rv" style="--d:520ms">动手前，先写下这一页的一句话结论</div>
+  <div class="folio">06 / 06</div>
+  <div class="footmark">庆哥聊AI · 怎么用 AI 做汇报</div>
+</section>
+
+</div><!-- /stage -->
+
+<!-- 交互三件套 chrome：编辑热区/按钮 + 画笔 + 演讲者（提词 N 已移除 2026-10-24，职责归 S 演讲者窗口） -->
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="编辑模式 (E)">Edit</button>
+<canvas class="pen-canvas" id="penCanvas"></canvas>
+<button class="pen-toggle fab" id="penToggle" title="画笔模式 (D)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4L7 21H3v-4L17 3z"/></svg></button>
+<button class="spk-toggle fab" id="spkToggle" title="演讲者模式 (S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+
+<script>
+(function () {
+// ===== chassis/core.js =====
+/* ============================================================
+   底盘核心 JS：翻页 / 缩放 / 提词数据 / slide:enter 钩子 / 键盘分发
+   模块接口（typeof 守卫调用，缺模块=功能静默禁用，永不报错）：
+   · interactions.js → clearPen / toggleEdit / togglePen / toggleSpeaker / spkBc
+   · effects.js      → rollNums
+   ============================================================ */
+var slides = document.querySelectorAll('.slide');
+var cur = 0;
+
+// 提词数据源（阶段 6 讲稿落点：每页 3-5 条要点；S 演讲者窗口备注卡读此数据源）
+var NOTES = {
+  p1: [
+    "开场先立靶：今天不讲工具，只讲四个动作。",
+    "一句话定调：不是省时间，是让台下看得懂。",
+    "预告结构：诊断、体量、图表、自检，四步走完。"
+  ],
+  p2: [
+    "先认病：不是你不会做，是三个习惯在拖后腿。",
+    "① 一页什么都想说——论点超过三个，就该拆页。",
+    "② 字越改越小——四百字一页，最后一排直接放弃。",
+    "③ 先排版再想内容——版式越花，逻辑越散。",
+    "落到一句：先定这页要让人记住什么，再谈排版。"
+  ],
+  p3: [
+    "三个数字是边界，不是考核指标。",
+    "判断方法：自己数一遍这页正文字数，超 200 就拆。",
+    "补一句：这是投影下的可读边界，不是审美偏好。"
+  ],
+  p4: [
+    "结论先说：图是替你把「所以呢」说完，不是装饰。",
+    "三种关系对三种图：趋势折线、构成柱或饼、排前条形。",
+    "提醒：一张图只讲一个关系，别塞两套数据。"
+  ],
+  p5: [
+    "这五句是上台前的检查单，一句一句过。",
+    "①② 管内容：想说清什么、三秒能不能看懂。",
+    "③④ 管现场：最后一排、有没有两页在说同一件事。",
+    "⑤ 管节奏：不看稿讲不完，就是页太多。"
+  ],
+  p6: [
+    "收口不提工具，只提判断力：AI 不替你想清楚。",
+    "给一个能立刻做的动作：动手前先写下这一页的一句话结论。",
+    "停两拍，再进问答。"
+  ]
+};
+
+function paint() {
+  var ul = document.getElementById('notes-body');
+  ul.innerHTML = '';
+  (NOTES[slides[cur].id] || []).forEach(function (t) {
+    var li = document.createElement('li');
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+}
+
+function __goto(n) {
+  if (n < 0 || n >= slides.length || n === cur) return;   // 同页短路：同 channel 多实例广播回环时到此为止（2026-10-24 回环事故）
+  slides[cur].classList.remove('active');
+  cur = n;
+  slides[cur].classList.add('active');
+  if (typeof clearPen === 'function') clearPen();      // 翻页自动清笔迹
+  if (typeof __stepReset === 'function') __stepReset(slides[cur]);   // step 叙事重置（离开再回来重播）
+  paint();
+  if (typeof rollNums === 'function') rollNums(slides[cur]);   // 数字滚动重播
+  slides[cur].dispatchEvent(new CustomEvent('slide:enter', { detail: { index: cur }, bubbles: true }));  // ECharts/动画/typewriter 监听（bubbles 供 document 级监听收到）
+}
+function go(n) {
+  __goto(n);
+  if (typeof spkBc !== 'undefined' && spkBc && !window.__previewOnly) spkBc.postMessage({ type: 'go', idx: cur });  // 同步演讲者窗口；收消息方走 __goto 不回播，防 A↔B 回声死循环（2026-10-24）
+}
+
+// step 叙事消费（effects.js 提供；返回 true=本次交互被 step 吃掉不翻页）
+function stepForward() { return typeof __stepConsume === 'function' && __stepConsume(1); }
+function stepBack() { return typeof __stepConsume === 'function' && __stepConsume(-1); }
+
+document.addEventListener('keydown', function (e) {
+  if (window.__previewOnly) return;
+  var inEd = !!(e.target && e.target.closest && e.target.closest('[contenteditable="true"],input,textarea'));
+  if (e.key === 'e' || e.key === 'E') { if (!inEd && typeof toggleEdit === 'function') toggleEdit(); return; }
+  if (e.key === 'd' || e.key === 'D') { if (!inEd && typeof togglePen === 'function') togglePen(); return; }
+  if (e.key === 's' || e.key === 'S') { if (!inEd && typeof toggleSpeaker === 'function') toggleSpeaker(); return; }
+  // N 提词面板已移除（2026-10-24）：主窗口是投屏观众可见，提词职责归 S 演讲者窗口备注卡
+  if (e.key === 'p' || e.key === 'P') { if (!inEd && !document.body.classList.contains('edit-mode')) window.print(); return; }  // PDF 导出（print.css 已锁 16:9 分页）
+  if (inEd) return;                                    // 输入态：翻页键还给文本操作
+  if (document.body.classList.contains('edit-mode')) return;  // 编辑态：翻页键全禁（防打断编辑；退出用 E）
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); if (!stepForward()) go(cur + 1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); if (!stepBack()) go(cur - 1); }
+});
+
+// 点击/右键翻页守卫（判据=编辑态正在选字/点到交互控件才不翻；data-click-nav="off" 整页逃生）
+// 0-24 修：选区判据限定编辑态——原版把放映态残留选区也当"正在选字"，点击翻页被静默拦死
+// 只能刷新（WB v3 实测：P3 大数字被鼠标划过留下选区后，右半屏点击永久失效，键盘正常）。
+function __flipBlocked(el) {
+  if (document.body.classList.contains('edit-mode')
+      && window.getSelection && String(window.getSelection()).trim()) return true;
+  if (!el || !el.closest) return true;
+  return !!el.closest('a,button,input,textarea,select,canvas,[contenteditable="true"]');
+}
+// 放映态 mousedown/touchstart 捕获阶段清残留选区（治"已经存在的选区"高亮残留；编辑态跳过）
+['mousedown', 'touchstart'].forEach(function (ev) {
+  document.addEventListener(ev, function () {
+    if (document.body.classList.contains('edit-mode')) return;
+    var sel = window.getSelection && window.getSelection();
+    if (sel && String(sel).trim()) sel.removeAllRanges();
+  }, true);
+});
+document.addEventListener('click', function (e) {
+  if (window.__previewOnly) return;
+  if (document.body.classList.contains('edit-mode')) return;
+  if (document.documentElement.getAttribute('data-click-nav') === 'off') return;
+  if (__flipBlocked(e.target)) return;
+  if (e.clientX > window.innerWidth / 2) { if (!stepForward()) go(cur + 1); }
+  else { if (!stepBack()) go(cur - 1); }
+});
+document.addEventListener('contextmenu', function (e) {
+  if (typeof penCanvas === 'undefined' || !penCanvas || !penCanvas.classList.contains('active')) {
+    // 画笔未激活时右键=上一页；激活时右键归画笔（清屏，见 interactions.js）
+    if (window.__previewOnly) return;
+    if (document.body.classList.contains('edit-mode')) return;
+    if (document.documentElement.getAttribute('data-click-nav') === 'off') return;
+    if (__flipBlocked(e.target)) return;
+    e.preventDefault();
+    go(cur - 1);
+  }
+});
+
+function fit() {
+  var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  document.getElementById('stage').style.transform = 'translate(-50%, -50%) scale(' + s + ')';
+}
+window.addEventListener('resize', fit);
+
+function __chassisInit() {
+  fit();
+  paint();
+  if (typeof rollNums === 'function') rollNums(slides[0]);
+  if (slides[0]) slides[0].dispatchEvent(new CustomEvent('slide:enter', { detail: { index: 0 }, bubbles: true }));  // 首屏同样派发（typewriter 等监听）
+}
+
+
+// ===== modules/interactions.js =====
+/* ============================================================
+   交互四件套（基本件，2026-10-21 v2 原生重写）：
+   E 编辑 / D 画笔 / S 演讲者 / preview 模式（N 提词面板已移除 2026-10-24，职责归 S 演讲者窗口备注卡）
+   守卫纪律：编辑态/预览态不翻页；画笔右键清屏；
+   E/D/S 在 contenteditable 聚焦时不触发；禁自动恢复 localStorage
+   依赖 core.js 的 slides/cur/NOTES/paint/go（顶层共享变量）
+   ============================================================ */
+
+// ========== Preview-only 模式（演讲者 iframe 预览：?preview=N 只渲染第 N 页，隐藏 chrome） ==========
+(function () {
+  var m = /[?&]preview=(\d+)/.exec(location.search || '');
+  if (!m) return;
+  var targetIdx = parseInt(m[1], 10) - 1;
+  window.__previewOnly = true;
+  window.__previewIdx = targetIdx;
+  var style = document.createElement('style');
+  style.textContent = '.pen-toggle,.pen-canvas,.spk-toggle,.edit-hotzone,.edit-toggle{display:none!important}'
+    // CSS 层直接显示目标页（零时序依赖兜底；nth 特异度压过 .slide.active 源码默认）
+    + ' .slide{display:none!important}'
+    + ' .slide:nth-of-type(' + (Math.max(1, targetIdx + 1)) + '){display:flex!important;flex-direction:column!important}';
+  document.head.appendChild(style);
+  // JS 层补切 active 类（与 CSS 双保险；file+query 文档脚本时序不可靠，2026-10-21 headless 实测）
+  var jump = function () {
+    var ss = document.querySelectorAll('.slide');
+    if (!ss.length) { if (jump.n++ < 50) setTimeout(jump, 100); return; }
+    var t = Math.max(0, Math.min(ss.length - 1, targetIdx));
+    ss.forEach(function (s, i) { s.classList.toggle('active', i === t); });
+  };
+  jump.n = 0;
+  if (document.readyState === 'complete') jump();
+  else window.addEventListener('DOMContentLoaded', jump);
+})();
+
+// ========== 画笔（D 键 / 右下角按钮；红色 3px 圆头，右键清屏，翻页自动清） ==========
+var penCanvas = document.getElementById('penCanvas'), penCtx = penCanvas.getContext('2d'), penToggle = document.getElementById('penToggle'), isPen = false, isDraw = false;
+function resizePen() { penCanvas.width = window.innerWidth; penCanvas.height = window.innerHeight; }
+resizePen(); window.addEventListener('resize', resizePen);
+function clearPen() { penCtx.clearRect(0, 0, penCanvas.width, penCanvas.height); }
+function togglePen() { isPen = !isPen; penCanvas.classList.toggle('active', isPen); penToggle.classList.toggle('active', isPen); }
+penToggle.addEventListener('click', togglePen);
+penCanvas.addEventListener('mousedown', function (e) {
+  if (e.button === 2) return;
+  isDraw = true;
+  penCtx.lineWidth = 3; penCtx.lineCap = 'round'; penCtx.lineJoin = 'round'; penCtx.strokeStyle = 'rgba(255,50,50,0.9)';
+  penCtx.beginPath(); penCtx.moveTo(e.clientX, e.clientY);
+});
+penCanvas.addEventListener('mousemove', function (e) { if (!isDraw) return; penCtx.lineTo(e.clientX, e.clientY); penCtx.stroke(); });
+penCanvas.addEventListener('mouseup', function () { isDraw = false; });
+penCanvas.addEventListener('mouseleave', function () { isDraw = false; });
+penCanvas.addEventListener('contextmenu', function (e) { e.preventDefault(); clearPen(); });
+
+// ========== 编辑模式（E 键 / 左上角热区；叶子文本元素开 contenteditable，Done 退出并自动下载新 HTML） ==========
+var editToggle = document.getElementById('editToggle'), hotzone = document.querySelector('.edit-hotzone'), isEdit = false, hideT;
+function toggleEdit() {
+  isEdit = !isEdit;
+  document.body.classList.toggle('edit-mode', isEdit);
+  editToggle.classList.toggle('active', isEdit);
+  document.querySelectorAll('.slide').forEach(function (s) {
+    s.querySelectorAll('div,p,span,li,h1,h2,h3,h4,strong,em,a').forEach(function (el) {
+      if (!el.querySelector('div,section,nav')) el.contentEditable = isEdit ? 'true' : 'false';
+    });
+  });
+  if (isEdit) { editToggle.textContent = 'Done'; editToggle.title = '退出编辑并导出 HTML (E)'; }
+  else {
+    editToggle.textContent = 'Edit'; editToggle.title = '编辑模式 (E)';
+    // 0-23 修复：Save 名不副实（localStorage 只写不读是死写入）→ 改为导出新 HTML 文件，编辑结果真正可留
+    try {
+      var blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (document.title || 'deck').replace(/[\\/:*?"<>|]/g, '').slice(0, 40) + '-edited-' + new Date().toISOString().slice(0, 19).replace(/[T:]/g, '') + '.html';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    } catch (e) { /* 导出失败不阻断退出编辑 */ }
+    document.querySelectorAll('[data-final]').forEach(function (el) { el.removeAttribute('data-final'); });  // 编辑后清缓存，重滚读新值
+  }
+}
+editToggle.addEventListener('click', toggleEdit);
+hotzone.addEventListener('mouseenter', function () { clearTimeout(hideT); editToggle.classList.add('show'); });
+hotzone.addEventListener('mouseleave', function () { hideT = setTimeout(function () { if (!isEdit) editToggle.classList.remove('show'); }, 400); });
+editToggle.addEventListener('mouseenter', function () { clearTimeout(hideT); });
+editToggle.addEventListener('mouseleave', function () { hideT = setTimeout(function () { if (!isEdit) editToggle.classList.remove('show'); }, 400); });
+hotzone.addEventListener('click', toggleEdit);
+
+// ========== 演讲者模式（S 键：独立窗口 + iframe 像素级预览 + BroadcastChannel 双向同步） ==========
+var spkToggle = document.getElementById('spkToggle');
+var presenterWin = null;
+var spkChannelName = 'slides-presenter-' + location.pathname;
+var spkBc = null;
+try { spkBc = new BroadcastChannel(spkChannelName); } catch (e) {}
+
+function getSlideMeta() {
+  var meta = [];
+  slides.forEach(function (s, i) {
+    var titleEl = s.querySelector('h2, h1');
+    meta.push({
+      title: titleEl ? titleEl.textContent.trim() : ('第 ' + (i + 1) + ' 页'),
+      notes: (NOTES[s.id] || []).map(function (t) { return '<div>' + t + '</div>'; }).join('')
+    });
+  });
+  return meta;
+}
+
+function toggleSpeaker() {
+  if (presenterWin && !presenterWin.closed) { presenterWin.focus(); return; }
+  var deckUrl = location.protocol + '//' + location.host + location.pathname;
+  var slideMeta = getSlideMeta();
+  var total = slides.length;
+  var startIdx = cur;
+  var storageKey = 'slides-presenter-layout:' + location.pathname;
+  presenterWin = window.open('', 'slides-presenter', 'width=1280,height=820,menubar=no,toolbar=no');
+  if (!presenterWin) { alert('请允许弹出窗口以使用演讲者视图'); return; }
+  presenterWin.document.open();
+  presenterWin.document.write(buildPresenterWindow(deckUrl, slideMeta, total, startIdx, storageKey));
+  presenterWin.document.close();
+  spkToggle.classList.add('active');
+  // 0-23 三修：S 不再连锁主窗口提词面板——主窗口是投屏，面板会盖压轴句且观众可见；
+  // 演讲者窗口自带 pcard-notes 备注卡，提词职责归它（原 10-21"主窗口跟开"需求就此废止）
+  paint();
+  paint();
+  var checkClosed = setInterval(function () {
+    if (presenterWin && presenterWin.closed) {
+      clearInterval(checkClosed);
+      presenterWin = null;
+      spkToggle.classList.remove('active');
+    }
+  }, 500);
+}
+
+function buildPresenterWindow(deckUrl, slideMeta, total, startIdx, storageKey) {
+  return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>演讲者视图</title>'
+  + '<style>'
+  + '*{margin:0;padding:0;box-sizing:border-box}'
+  + 'html,body{width:100%;height:100%;overflow:hidden;background:#1a1d24;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans SC",sans-serif}'
+  + '#stage{position:absolute;inset:0;overflow:hidden}'
+  + '.pcard{position:absolute;background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden;min-width:180px;min-height:100px;transition:box-shadow .2s,border-color .2s}'
+  + '.pcard:hover{border-color:rgba(88,166,255,.3)}'
+  + '.pcard-head{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);cursor:move;user-select:none;flex-shrink:0}'
+  + '.pcard-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}'
+  + '.pcard-title{font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:#8b949e;flex:1}'
+  + '.pcard-meta{font-size:11px;color:#6e7681}'
+  + '.pcard-body{flex:1;position:relative;overflow:hidden;min-height:0}'
+  + '.pcard-preview .pcard-body{background:#000}'
+  + '.pcard-preview iframe{position:absolute;top:0;left:0;width:1920px;height:1080px;border:none;transform-origin:top left;pointer-events:none;background:transparent}'
+  + '.preview-end{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:14px;letter-spacing:.12em}'
+  + '.pcard-notes .pcard-body{padding:14px 18px;overflow-y:auto;font-size:16px;line-height:1.75;color:#d0d7de;font-family:"Noto Sans SC",-apple-system,sans-serif}'
+  + '.pcard-notes .pcard-body:empty::before{content:"（这一页还没有备注）";color:#484f58;font-style:italic}'
+  + '.pcard-notes .pcard-body:focus{outline:none;background:rgba(255,255,255,.03);border-radius:4px}'
+  + '.pcard-notes .pcard-body div{margin-bottom:6px}'
+  + '.pcard-timer .pcard-body{display:flex;flex-direction:column;gap:14px;padding:18px 20px;justify-content:center}'
+  + '.timer-display{font-family:"SF Mono","JetBrains Mono",monospace;font-size:42px;font-weight:700;color:#3fb950;letter-spacing:.04em;line-height:1}'
+  + '.timer-row{display:flex;align-items:center;gap:12px;font-size:14px;color:#8b949e}'
+  + '.timer-row .label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#6e7681}'
+  + '.timer-row .val{color:#e6edf3;font-weight:600;font-family:"SF Mono",monospace}'
+  + '.timer-controls{display:flex;gap:8px;flex-wrap:wrap}'
+  + '.timer-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e6edf3;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}'
+  + '.timer-btn:hover{background:rgba(88,166,255,.15);border-color:#58a6ff}'
+  + '.pcard-resize{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;z-index:5;background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.25) 50%,rgba(255,255,255,.25) 60%,transparent 60%,transparent 70%,rgba(255,255,255,.25) 70%,rgba(255,255,255,.25) 80%,transparent 80%)}'
+  + '.pcard-resize:hover{background:linear-gradient(135deg,transparent 50%,#58a6ff 50%,#58a6ff 60%,transparent 60%,transparent 70%,#58a6ff 70%,#58a6ff 80%,transparent 80%)}'
+  + '.hint-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,.08);padding:6px 16px;font-size:11px;color:#8b949e;display:flex;gap:18px;align-items:center;z-index:1000}'
+  + '.hint-bar kbd{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:3px;font-family:"SF Mono",monospace;font-size:10px;border:1px solid rgba(255,255,255,.1);color:#e6edf3}'
+  + '.reset-layout{margin-left:auto;background:transparent;border:1px solid rgba(255,255,255,.15);color:#8b949e;padding:3px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit}'
+  + '.reset-layout:hover{background:rgba(248,81,73,.15);border-color:#f85149;color:#f85149}'
+  + 'body.is-dragging *{user-select:none!important}'
+  + 'body.is-dragging iframe{pointer-events:none!important}'
+  + '</style></head><body>'
+  + '<div id="stage">'
+  + '<div class="pcard pcard-preview" id="card-cur"><div class="pcard-head" data-drag><span class="pcard-dot" style="background:#58a6ff"></span><span class="pcard-title">当前页</span><span class="pcard-meta" id="cur-meta">-</span></div><div class="pcard-body"><iframe id="iframe-cur"></iframe></div><div class="pcard-resize" data-resize></div></div>'
+  + '<div class="pcard pcard-preview" id="card-nxt"><div class="pcard-head" data-drag><span class="pcard-dot" style="background:#bc8cff"></span><span class="pcard-title">下一页</span><span class="pcard-meta" id="nxt-meta">-</span></div><div class="pcard-body"><iframe id="iframe-nxt"></iframe></div><div class="pcard-resize" data-resize></div></div>'
+  + '<div class="pcard pcard-notes" id="card-notes"><div class="pcard-head" data-drag><span class="pcard-dot" style="background:#f0883e"></span><span class="pcard-title">备注（可编辑）</span></div><div class="pcard-body" id="notes-body" contenteditable="true"></div><div class="pcard-resize" data-resize></div></div>'
+  + '<div class="pcard pcard-timer" id="card-timer"><div class="pcard-head" data-drag><span class="pcard-dot" style="background:#3fb950"></span><span class="pcard-title">计时器</span></div><div class="pcard-body"><div class="timer-display" id="timer-display">00:00</div><div class="timer-row"><span class="label">页码</span><span class="val" id="timer-count">1 / ' + total + '</span></div><div class="timer-controls"><button class="timer-btn" id="btn-prev">&larr; 上一页</button><button class="timer-btn" id="btn-next">下一页 &rarr;</button><button class="timer-btn" id="btn-reset">&#9201; 重置</button></div></div><div class="pcard-resize" data-resize></div></div>'
+  + '</div>'
+  + '<div class="hint-bar"><span><kbd>&larr; &rarr;</kbd> 翻页</span><span><kbd>R</kbd> 重置计时</span><span><kbd>Esc</kbd> 关闭</span><span style="color:#6e7681">拖动卡片头部移动 &middot; 拖动右下角调整大小 &middot; 备注可直接编辑</span><button class="reset-layout" id="reset-layout">重置布局</button></div>'
+  + '<scr' + 'ipt>'
+  + '(function(){'
+  + 'var slideMeta=' + JSON.stringify(slideMeta) + ';'
+  + 'var total=' + total + ';'
+  + 'var idx=' + startIdx + ';'
+  + 'var deckUrl=' + JSON.stringify(deckUrl) + ';'
+  + 'var STORAGE_KEY=' + JSON.stringify(storageKey) + ';'
+  + 'var bc;try{bc=new BroadcastChannel("slides-presenter-' + location.pathname + '");}catch(e){}'
+  + 'var iframeCur=document.getElementById("iframe-cur"),iframeNxt=document.getElementById("iframe-nxt");'
+  + 'var notesBody=document.getElementById("notes-body"),curMeta=document.getElementById("cur-meta"),nxtMeta=document.getElementById("nxt-meta");'
+  + 'var timerDisplay=document.getElementById("timer-display"),timerCount=document.getElementById("timer-count");'
+  + 'function defaultLayout(){var w=window.innerWidth,h=window.innerHeight-36;return{"card-cur":{x:16,y:16,w:Math.round(w*.55)-24,h:Math.round(h*.62)-16},"card-nxt":{x:Math.round(w*.55)+8,y:16,w:w-Math.round(w*.55)-24,h:Math.round(h*.42)-16},"card-notes":{x:Math.round(w*.55)+8,y:Math.round(h*.42)+8,w:w-Math.round(w*.55)-24,h:h-Math.round(h*.42)-16},"card-timer":{x:16,y:Math.round(h*.62)+8,w:Math.round(w*.55)-24,h:h-Math.round(h*.62)-16}};}'
+  + 'function applyLayout(l){Object.keys(l).forEach(function(id){var el=document.getElementById(id);if(el&&l[id]){el.style.left=l[id].x+"px";el.style.top=l[id].y+"px";el.style.width=l[id].w+"px";el.style.height=l[id].h+"px";}});rescaleAll();}'
+  + 'function readLayout(){try{var s=localStorage.getItem(STORAGE_KEY);if(s)return JSON.parse(s);}catch(e){}return defaultLayout();}'
+  + 'function saveLayout(){var l={};["card-cur","card-nxt","card-notes","card-timer"].forEach(function(id){var el=document.getElementById(id);if(el)l[id]={x:parseInt(el.style.left,10)||0,y:parseInt(el.style.top,10)||0,w:parseInt(el.style.width,10)||300,h:parseInt(el.style.height,10)||200};});try{localStorage.setItem(STORAGE_KEY,JSON.stringify(l));}catch(e){}}'
+  + 'function rescaleIframe(iframe){if(!iframe||iframe.style.display==="none")return;var body=iframe.parentElement,cw=body.clientWidth,ch=body.clientHeight;if(!cw||!ch)return;var s=Math.min(cw/1920,ch/1080);iframe.style.transform="scale("+s+")";var sw=1920*s,sh=1080*s;iframe.style.left=Math.max(0,(cw-sw)/2)+"px";iframe.style.top=Math.max(0,(ch-sh)/2)+"px";}'
+  + 'function rescaleAll(){rescaleIframe(iframeCur);rescaleIframe(iframeNxt);}'
+  + 'window.addEventListener("resize",rescaleAll);'
+  + 'document.querySelectorAll("[data-drag]").forEach(function(handle){handle.addEventListener("mousedown",function(e){if(e.button!==0)return;var card=handle.closest(".pcard");if(!card)return;e.preventDefault();document.body.classList.add("is-dragging");var sx=e.clientX,sy=e.clientY,sl=parseInt(card.style.left,10)||0,st=parseInt(card.style.top,10)||0;function onM(ev){card.style.left=Math.max(0,Math.min(window.innerWidth-100,sl+ev.clientX-sx))+"px";card.style.top=Math.max(0,Math.min(window.innerHeight-50,st+ev.clientY-sy))+"px";}function onU(){document.body.classList.remove("is-dragging");document.removeEventListener("mousemove",onM);document.removeEventListener("mouseup",onU);saveLayout();}document.addEventListener("mousemove",onM);document.addEventListener("mouseup",onU);});});'
+  + 'document.querySelectorAll("[data-resize]").forEach(function(handle){handle.addEventListener("mousedown",function(e){if(e.button!==0)return;var card=handle.closest(".pcard");if(!card)return;e.preventDefault();e.stopPropagation();document.body.classList.add("is-dragging");var sx=e.clientX,sy=e.clientY,sw=parseInt(card.style.width,10)||card.offsetWidth,sh=parseInt(card.style.height,10)||card.offsetHeight;function onM(ev){card.style.width=Math.max(180,sw+ev.clientX-sx)+"px";card.style.height=Math.max(100,sh+ev.clientY-sy)+"px";if(card.querySelector("iframe"))rescaleIframe(card.querySelector("iframe"));}function onU(){document.body.classList.remove("is-dragging");document.removeEventListener("mousemove",onM);document.removeEventListener("mouseup",onU);rescaleAll();saveLayout();}document.addEventListener("mousemove",onM);document.addEventListener("mouseup",onU);});});'
+  + 'var iframeReady={cur:false,nxt:false};'
+  + 'window.addEventListener("message",function(e){if(!e.data||e.data.type!=="preview-ready")return;'
+  + 'if(e.source===iframeCur.contentWindow){iframeReady.cur=true;postGoto(iframeCur,idx);}'
+  + 'if(e.source===iframeNxt.contentWindow){iframeReady.nxt=true;postGoto(iframeNxt,idx+1<total?idx+1:idx);}'
+  + 'rescaleAll();});'
+  + 'function postGoto(iframe,n){try{iframe.contentWindow.postMessage({type:"presenter-goto",idx:n},"*");}catch(e){}}'
+  + 'function update(n){n=Math.max(0,Math.min(total-1,n));idx=n;'
+  + 'if(iframeReady.cur)postGoto(iframeCur,n);curMeta.textContent=(n+1)+"/"+total;'
+  + 'if(n+1<total){iframeNxt.style.display="";var endEl=document.querySelector("#card-nxt .preview-end");if(endEl)endEl.remove();if(iframeReady.nxt)postGoto(iframeNxt,n+1);nxtMeta.textContent=(n+2)+"/"+total;}'
+  + 'else{iframeNxt.style.display="none";var body=document.querySelector("#card-nxt .pcard-body");if(body&&!body.querySelector(".preview-end")){var end=document.createElement("div");end.className="preview-end";end.textContent="— 已是最后一页 —";body.appendChild(end);}nxtMeta.textContent="END";}'
+  + 'notesBody.innerHTML=slideMeta[n].notes||"";'
+  + 'timerCount.textContent=(n+1)+" / "+total;'
+  + 'saveNotesBack();}'
+  + 'var tStart=Date.now();'
+  + 'var timerIv=setInterval(function(){var s=Math.floor((Date.now()-tStart)/1000),mm=String(Math.floor(s/60)).padStart(2,"0"),ss=String(s%60).padStart(2,"0");timerDisplay.textContent=mm+":"+ss;},1000);'
+  + 'function resetTimer(){tStart=Date.now();timerDisplay.textContent="00:00";}'
+  + 'function saveNotesBack(){try{var bc2=new BroadcastChannel("slides-presenter-' + location.pathname + '");bc2.postMessage({type:"notes-update",idx:idx,notes:notesBody.innerHTML});setTimeout(function(){bc2.close();},100);}catch(e){}}'
+  + 'notesBody.addEventListener("blur",saveNotesBack);'
+  + 'if(bc){bc.onmessage=function(e){if(!e.data)return;if(e.data.type==="go")update(e.data.idx);else if(e.data.type==="notes-update"){slideMeta[e.data.idx]=slideMeta[e.data.idx]||{};slideMeta[e.data.idx].notes=e.data.notes;}};}'
+  + 'function go(n){update(n);if(bc)bc.postMessage({type:"go",idx:idx});}'
+  + 'document.getElementById("btn-prev").addEventListener("click",function(){go(idx-1);});'
+  + 'document.getElementById("btn-next").addEventListener("click",function(){go(idx+1);});'
+  + 'document.getElementById("btn-reset").addEventListener("click",resetTimer);'
+  + 'document.getElementById("reset-layout").addEventListener("click",function(){if(confirm("恢复默认卡片布局？")){try{localStorage.removeItem(STORAGE_KEY);}catch(e){}applyLayout(defaultLayout());}});'
+  + 'document.addEventListener("keydown",function(e){if(e.metaKey||e.ctrlKey||e.altKey)return;switch(e.key){case"ArrowRight":case" ":case"PageDown":go(idx+1);e.preventDefault();break;case"ArrowLeft":case"PageUp":go(idx-1);e.preventDefault();break;case"Home":go(0);break;case"End":go(total-1);break;case"r":case"R":resetTimer();break;case"Escape":window.close();break;}});'
+  + 'iframeCur.addEventListener("load",function(){rescaleIframe(iframeCur);});'
+  + 'iframeNxt.addEventListener("load",function(){rescaleIframe(iframeNxt);});'
+  + 'applyLayout(readLayout());'
+  + 'iframeCur.src=deckUrl+"?preview="+(idx+1);'
+  + 'if(idx+1<total)iframeNxt.src=deckUrl+"?preview="+(idx+2);'
+  + 'notesBody.innerHTML=slideMeta[idx].notes||"";'
+  + 'curMeta.textContent=(idx+1)+"/"+total;'
+  + 'nxtMeta.textContent=(idx+2<total?(idx+2)+"/"+total:"END");'
+  + 'timerCount.textContent=(idx+1)+" / "+total;'
+  + '})();'
+  + '</scr' + 'ipt></body></html>';
+}
+
+// 主窗口：接收演讲者窗口消息——go 跟翻（双屏同步）、备注编辑回写 NOTES
+if (spkBc) {
+  spkBc.onmessage = function (e) {
+    if (!e.data) return;
+    if (e.data.type === 'go' && typeof e.data.idx === 'number') __goto(e.data.idx);   // 收广播只跳页不回播（防多实例回声回环，2026-10-24）
+    else if (e.data.type === 'notes-update' && typeof e.data.idx === 'number') {
+      var s = slides[e.data.idx];
+      if (!s) return;
+      var tmp = document.createElement('div');
+      tmp.innerHTML = e.data.notes || '';
+      var arr = [];
+      tmp.querySelectorAll('div,li,p').forEach(function (el) { var t = el.textContent.trim(); if (t) arr.push(t); });
+      if (!arr.length && tmp.textContent.trim()) arr.push(tmp.textContent.trim());
+      NOTES[s.id] = arr;
+      paint();
+    }
+  };
+}
+spkToggle.addEventListener('click', toggleSpeaker);
+
+// ========== Preview-only：只听翻页指令（跳页已在前置检测块完成；iframe 内不广播，防 nxt 预览污染主窗口） ==========
+if (window.__previewOnly) {
+  window.addEventListener('message', function (e) {
+    if (!e.data) return;
+    if (e.data.type === 'presenter-goto') __goto(parseInt(e.data.idx, 10));   // 同页短路防重播（2026-10-24）
+  });
+  try { window.parent && window.parent.postMessage({ type: 'preview-ready' }, '*'); } catch (ex) {}
+}
+
+
+// ===== modules/effects.js =====
+/* ============================================================
+   数字滚动（动画件，按需装配；2026-10-21 v2 原生）
+   读数字元素终值自动滚，生成端零属性配合：
+   命中 .hero-num / .metric .mv / .num / .roll
+   千分位/小数位/正负号/单位（small）原样保留；
+   data-final 缓存终值供重播；编辑态与 reduced-motion 跳过。
+   驱动用 setTimeout(16ms)——headless/打印等无帧环境同样可跑。
+   ============================================================ */
+var REDUCE_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function rollNums(slide) {
+  if (!slide || REDUCE_MOTION || document.body.classList.contains('edit-mode')) return;
+  slide.querySelectorAll('.hero-num, .metric .mv, .num, .roll').forEach(function (el) {
+    if (el.querySelector('canvas,svg')) return;
+    var tn = null;
+    for (var i = 0; i < el.childNodes.length; i++) {
+      if (el.childNodes[i].nodeType === 3 && el.childNodes[i].nodeValue.trim()) { tn = el.childNodes[i]; break; }
+    }
+    if (!tn) return;
+    var finalText = el.getAttribute('data-final') || tn.nodeValue;
+    el.setAttribute('data-final', finalText);
+    var m = /([+-]?)([\d,]+(?:\.\d+)?)/.exec(finalText.trim());
+    if (!m) return;
+    var target = parseFloat(m[2].replace(/,/g, ''));
+    if (!isFinite(target) || target === 0) return;
+    var dec = m[2].indexOf('.') === -1 ? 0 : m[2].split('.')[1].length;
+    var hasComma = m[2].indexOf(',') !== -1;
+    var pre = finalText.trim().slice(0, m.index) + m[1];
+    var suf = finalText.trim().slice(m.index + m[0].length);
+    function fmt(v) {
+      var s = v.toFixed(dec);
+      if (hasComma) { var p = s.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); s = p.join('.'); }
+      return pre + s + suf;
+    }
+    var t0 = performance.now(), DUR = 1100;
+    (function tick() {
+      var pr = Math.min((performance.now() - t0) / DUR, 1);
+      var ease = 1 - Math.pow(1 - pr, 3);
+      tn.nodeValue = fmt(target * ease);
+      if (pr < 1) setTimeout(tick, 16); else tn.nodeValue = fmt(target);   // setTimeout 驱动：headless/打印等无帧环境同样可跑
+    })();
+  });
+}
+
+/* ============================================================
+   step 叙事（逐步揭示，2026-10-21 v2 原生）
+   元素挂 class="step"（焦点数字可挂 "step impact" 弹入）；
+   点击/翻页键：先逐个亮出本页 step，全亮完才翻页；左向逆序收起。
+   纪律（承 v1 初见密度教训）：同类正文组首条不挂 step，防「翻到即空页」。
+   ============================================================ */
+function __stepReset(slide) {
+  if (!slide) return;
+  slide.querySelectorAll('.step').forEach(function (el) { el.classList.remove('on'); });
+  slide.__spotIdx = -1;
+  __spotApply(slide);
+}
+function __stepConsume(dir) {
+  var s = slides[cur];
+  if (!s) return false;
+  var steps = s.querySelectorAll('.step');
+  if (steps.length) {
+    var shown = s.querySelectorAll('.step.on');
+    if (dir >= 0) {
+      if (shown.length < steps.length) { steps[shown.length].classList.add('on'); return true; }
+      return false;                                       // 全亮完 → 放行翻页
+    } else {
+      if (shown.length > 0) { shown[shown.length - 1].classList.remove('on'); return true; }
+      return false;                                       // 全收完 → 放行回上一页
+    }
+  }
+  return __spotConsume(s, dir);                           // 本页无 .step → 聚光式接管
+}
+
+/* ============================================================
+   聚光式 step（2026-10-22 软拦截版）：并列板块"讲到谁亮谁"。
+   组容器挂 class="spot-group"，子项按 DOM 序为聚光序列。
+   节奏（维护者实测裁定）：初始全亮 → 点按逐项聚光 → 末项后即放行翻页
+   （内容全可见=软拦截，动画服务讲述不绑架讲述，无"收束态"）。
+   单点模式：容器加 data-spot="1"（只聚光第 1 项，点一下→再点翻页）；
+   遍历模式默认全项。使用前提：客户明确要求的讲述编排才配（按需件，
+   生成端推断不出讲述意图，禁自动添加）；组直接子项不挂 .rv。
+   ============================================================ */
+function __spotApply(slide) {
+  var items = slide.querySelectorAll('.spot-group > *');
+  var idx = slide.__spotIdx;
+  items.forEach(function (el, i) {
+    el.classList.toggle('spot-dim', idx >= 0 && idx < items.length && i !== idx);
+  });
+}
+function __spotConsume(s, dir) {
+  var items = s.querySelectorAll('.spot-group > *');
+  if (!items.length) return false;
+  var group = s.querySelector('.spot-group');          // data-spot 挂组容器（一页一组纪律）
+  var N = Math.min(parseInt(group.getAttribute('data-spot') || items.length, 10) || items.length, items.length);
+  var idx = s.__spotIdx == null ? -1 : s.__spotIdx;      // -1 初始全亮 … 0..N-1 聚光
+  if (dir >= 0) {
+    if (idx < N - 1) { s.__spotIdx = idx + 1; __spotApply(s); return true; }
+    return false;                                        // 末项聚光后 → 放行翻页
+  } else {
+    if (idx > -1) { s.__spotIdx = idx - 1; __spotApply(s); return true; }
+    return false;                                        // 退回初始态 → 放行回上一页
+  }
+}
+
+/* ============================================================
+   折线精确描线：量每条 .line 真实长度写入 --len（dasharray 写死 2600 时
+   线长 550 的折线前 20% 动画在空白期后突然出现——2026-10-21 维护者实测生硬）
+   ============================================================ */
+document.addEventListener('slide:enter', function (e) {
+  var slide = e.target;
+  if (!slide || !slide.querySelectorAll) return;
+  slide.querySelectorAll('.chart .line').forEach(function (p) {
+    if (p.dataset.lenDone) return;
+    try { p.style.setProperty('--len', p.getTotalLength()); p.dataset.lenDone = '1'; } catch (err) {}
+  });
+});
+
+/* ============================================================
+   3D 悬停（品牌风卡片可选）：挂 .tilt-card 自动生效；reduced-motion 跳过
+   ============================================================ */
+(function () {
+  if (REDUCE_MOTION) return;
+  document.querySelectorAll('.tilt-card').forEach(function (card) {
+    card.addEventListener('mousemove', function (e) {
+      var r = card.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = 'rotateY(' + (x * 8) + 'deg) rotateX(' + (-y * 8) + 'deg)';
+    });
+    card.addEventListener('mouseleave', function () { card.style.transform = 'rotateY(0) rotateX(0)'; });
+  });
+})();
+
+/* ============================================================
+   粒子背景（科技氛围签名，Neon Cyber/Data Dark 类）：页面含 .particle-canvas 才初始化
+   ============================================================ */
+(function () {
+  var canvas = document.querySelector('.particle-canvas');
+  if (!canvas || REDUCE_MOTION) return;
+  var ctx = canvas.getContext('2d');
+  var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#E8A33D';
+  var particles = [], COUNT = 48, MAXD = 130;
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (var i = 0; i < COUNT; i++) {
+    particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.32, vy: (Math.random() - 0.5) * 0.32, r: Math.random() * 1.5 + 0.5 });
+  }
+  (function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = accent; ctx.globalAlpha = 0.55; ctx.fill();
+      for (var j = i + 1; j < particles.length; j++) {
+        var q = particles[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.sqrt(dx * dx + dy * dy);
+        if (d < MAXD) {
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = accent; ctx.globalAlpha = 0.14 * (1 - d / MAXD); ctx.lineWidth = 0.5; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  })();
+})();
+
+/* ============================================================
+   打字机（点名单用）：挂 .typewriter，首次进场逐字显示
+   ============================================================ */
+var twDone = new Set();
+document.addEventListener('slide:enter', function (e) {
+  var slide = e.target;
+  if (twDone.has(slide.id) || REDUCE_MOTION) return;
+  var els = slide.querySelectorAll('.typewriter');
+  if (!els.length) return;
+  twDone.add(slide.id);
+  els.forEach(function (el, k) {
+    var text = el.textContent;
+    el.textContent = '';
+    el.classList.add('tw-on');
+    var delay = 300 + k * 600;
+    text.split('').forEach(function (ch, i) {
+      setTimeout(function () {
+        var sp = document.createElement('span');
+        sp.className = 'tw-ch';
+        sp.textContent = ch;
+        el.appendChild(sp);
+      }, delay + i * 70);
+    });
+  });
+});
+
+
+// ===== modules/anim-runtime.js =====
+/* ============================================================
+   代码动画运行时（2026-10-21 · v6 规格平移 v2 底盘）
+   只管生命周期，不懂绘制：生成端逐页写绘制逻辑（anim-recipes 五配方），
+   注册进来即获得——首次进场起播 / 翻回自动重播 / 切页即停 /
+   reduced 直接终态 / 打印前终态 / 点击容器重播 / 时长硬顶 4s。
+   ============================================================ */
+var __anims = {};
+function __anim(pageId, drawFn, opts) {
+  __anims[pageId] = { fn: drawFn, opts: opts || {}, raf: null, timer: null };
+}
+function __animFinal(a) {
+  if (a.raf) clearTimeout(a.raf);
+  if (a.timer) clearTimeout(a.timer);
+  a.raf = null; a.timer = null;
+  try { a.h && a.h.final(); } catch (e) {}
+}
+function __animPlay(pageId) {
+  var a = __anims[pageId];
+  if (!a || !a.fn) return;
+  __animFinal(a);                                   // 先归终态再重播（清上一轮）
+  var dur = Math.min(4000, Math.max(600, a.opts.dur || 2000));   // v6 硬顶 4s
+  var delay = Math.min(800, Math.max(0, a.opts.delay != null ? a.opts.delay : 300));
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  try { a.h = a.fn(); } catch (e) { return; }        // 绘制控制器实例化：{step(t), final()}
+  if (!a.h || typeof a.h.final !== 'function') return;
+  if (reduced) { a.h.final(); return; }              // reduced：直接终态，不跑
+  a.timer = setTimeout(function () {
+    var t0 = performance.now();
+    (function tick() {
+      var t = Math.min((performance.now() - t0) / dur, 1);
+      try { a.h.step(t); } catch (e) { return; }
+      if (t < 1) a.raf = setTimeout(tick, 16);       // setTimeout 驱动：headless/打印等无帧环境同样可跑（rollNums 同款教训）
+      else { a.raf = null; a.h.final(); }            // 播完停终态，不循环
+    })();
+  }, delay);
+}
+document.addEventListener('slide:enter', function (e) {
+  var id = e.target && e.target.id;
+  if (id && __anims[id]) __animPlay(id);             // 首次/翻回都重播
+});
+window.addEventListener('beforeprint', function () { // 打印/PDF 前全部定格终态（未播过的先实例化再定格，防空白页）
+  Object.keys(__anims).forEach(function (k) {
+    var a = __anims[k];
+    if (!a.h && a.fn) { try { a.h = a.fn(); } catch (e) { return; } }
+    __animFinal(a);
+  });
+});
+window.__anim = __anim;   // 生成端接口（底盘 JS 在 IIFE 内，不导出则页面脚本调不到）
+__chassisInit();
+})();
+</script>
+</body>
+</html>

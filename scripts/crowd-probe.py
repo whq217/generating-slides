@@ -63,9 +63,11 @@ def main():
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(1)
     if not _HAS_PLAYWRIGHT:
-        print("[SKIP] 本机解释器 %s 未安装 playwright，拥挤探针跳过。"
-              "（缺环境不算产物问题；要跑请换装了 playwright 的解释器，"
-              "禁临时安装）" % sys.executable)
+        print("可选检查未启用：拥挤检测（本机没装 playwright）。\n"
+              "        不影响出稿与交付——它只是额外的体检，不做也能正常用。\n"
+              "        想启用这项检查：pip install playwright 后再跑一次。\n"
+              "        环境信息：当前解释器 %s\n"
+              "        [SKIP]" % sys.executable)
         sys.exit(0)
     path = os.path.abspath(sys.argv[1]).replace('\\', '/')
     if not path.startswith('file:'):
