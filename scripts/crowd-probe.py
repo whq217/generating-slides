@@ -35,12 +35,13 @@ JS = """() => {
       const r = el.getBoundingClientRect();
       if (r.width < 2 || r.height < 2) return;
       const fs = parseFloat(st.fontSize), lh = parseFloat(st.lineHeight) || fs * 1.4;
-      texts.push({ t: el.textContent.trim().slice(0, 16), x: r.x, y: r.y, w: r.width, h: r.height, fs, ratio: lh / fs, el });
+      const isDisplay = !!el.closest('[class*="dv-"], .hero-num, .ritual');
+      texts.push({ t: el.textContent.trim().slice(0, 16), x: r.x, y: r.y, w: r.width, h: r.height, fs, ratio: lh / fs, el, isDisplay });
     });
     const probs = [];
     for (let a = 0; a < texts.length; a++) {
       const A = texts[a];
-      if (A.ratio < 1.25 && A.fs >= 20 && A.fs < 50) probs.push('行高密[' + A.t + '] ratio=' + A.ratio.toFixed(2));
+      if (A.ratio < 1.25 && A.fs >= 20 && !A.isDisplay) probs.push('行高密[' + A.t + '] ratio=' + A.ratio.toFixed(2));
       for (let b2 = a + 1; b2 < texts.length; b2++) {
         const B = texts[b2];
         if (A.el.contains(B.el) || B.el.contains(A.el)) continue;

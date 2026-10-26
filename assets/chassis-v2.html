@@ -414,6 +414,7 @@ body:not(.edit-mode) .stage { user-select: none; -webkit-user-select: none; }
   /* 背景强制保留：Chrome 打印默认丢弃背景色，暗底 deck 会导出成白纸（0-23 修复） */
   html, body, .slide, .slide * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   html, body { height: auto; background: #fff; overflow: visible; }
+  .slide { background: var(--bg); }  /* 0-25 修复：body 打印时被上行改白，slide 自身无背景则半透明装饰叠白=灰页；给每页发实底 */
   .stage { position: static; transform: none !important; width: 1920px; height: auto; }
   .slide { display: flex !important; position: relative; inset: auto; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
   .slide:last-of-type { break-after: auto; page-break-after: auto; }

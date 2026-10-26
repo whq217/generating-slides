@@ -2,15 +2,16 @@
 name: generating-slides
 slug: generating-slides
 displayName: 网页幻灯片制作专家
-version: 1.2.0
-author: 公众号「庆哥聊AI」
+version: 1.6.1
+author: 庆哥聊AI
+copyright: Hongqing W
 license: MIT
 summary: "说一句话或丢一份材料，出可直接放映的网页幻灯片——单文件 HTML、七步引导、三层排版硬约束、交付前自动体检。"
-description: "说一句话或丢一份材料，出可直接放映的网页幻灯片——单文件 HTML，双击就放。七步走完：配置、备素材、优化、大纲、风格、生成、交付前体检，每步等你点头。这样说就行：「做个 Q3 复盘 PPT，12 页，给管理层看」→ 从零生成；「这份 docx 做成 10 页汇报稿」→ 重排现成材料；「第 3 页太挤，砍一半」→ 只改指定页。排版不靠感觉：三层硬约束在前，超密度砍字砍页；交付前跑三道自动校验。放映自带编辑、画笔与演讲者备注窗口，按 P 出 PDF。本技能基于 Zara Zhang 的 Frontend Slides（MIT）二次开发，由公众号「庆哥聊AI」完善发布，仍按 MIT 分发。**触发场景：** 当用户说「帮我做PPT」「创建演示」「做个汇报」「制作slides」「生成幻灯片」「准备一份展示」「做个介绍」「make a presentation」「create slides」时使用此技能。即使用户没有明确说做PPT，只要提到需要展示、汇报或介绍的内容（如「我要给领导做个汇报」「帮我准备下周分享的材料」「做个产品介绍」），也应使用此技能。"
+description: "把一句话需求或现成材料做成可放映的网页幻灯片（单文件 HTML）。三种用法：从零生成（「做个 Q3 复盘 PPT，12 页，给管理层看」）/ 重排材料（「这份 docx 做成 10 页汇报稿」）/ 只改指定页（「第 3 页太挤，砍一半」）。内置 22 套风格预设、三层排版硬约束、交付前自动机验。**触发场景：** 用户说「帮我做PPT」「创建演示」「做个汇报」「制作slides」「生成幻灯片」「准备一份展示」「做个介绍」「make a presentation」「create slides」时使用；即使没明确说做 PPT，提到需要展示、汇报或介绍的内容（如「我要给领导做个汇报」「帮我准备下周分享的材料」「做个产品介绍」）也应使用此技能。"
+description_zh: "把一句话需求做成可直接放映的网页幻灯片：单文件 HTML、1920×1080 投影级版面、七阶段引导式确认。内置 22 套风格预设与三层排版红线（版面率→字号→秩序），交付前用机验脚本自动检查；支持 P 键导出 PDF，附 E 编辑／D 画笔／S 演讲者窗口三重交互。"
+description_en: "A single-file HTML deck generator for projection-grade presentations. Seven-stage guided workflow, 22 style presets, a three-layer layout system (fill ratio, type scale, visual order), and built-in checker scripts that verify each deck before delivery."
 tags: [演示文稿, PPT, 幻灯片, 汇报, 网页幻灯片]
 compatibility: "生成期零外部依赖（纯静态单文件）。机验：Chrome headless（measure-layout.js 版率）+ verify-consistency.py（纯 Python 零依赖）；crowd-probe.py 需 playwright（缺则打印 [SKIP] 跳过，不判红、禁临时安装）。可选：python-pptx/docx（素材提取）、Node.js（底盘构建）。"
-description_zh: 把一句话需求做成可直接放映的网页幻灯片：单文件 HTML、1920×1080 投影级版面、七阶段引导式确认。内置 22 套风格预设与三层排版红线（版面率→字号→秩序），交付前用机验脚本自动检查；支持 P 键导出 PDF，附 E 编辑／D 画笔／S 演讲者窗口三重交互。
-description_en: A single-file HTML deck generator for projection-grade presentations. Seven-stage guided workflow, 22 style presets, a three-layer layout system (fill ratio, type scale, visual order), and built-in checker scripts that verify each deck before delivery.
 ---
 
 <!--
@@ -32,23 +33,21 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 ```
 第一层 底盘：版面率   → 密排 ≥60% 面积且宽 ≥80% / 双栏 ≥45% / 单焦点主角块 ≥60% 版心
 第二层 阅读：字号     → 正文地板 22px（1/50 屏高）/ 标题 84px 锁档 / 仪式位 110-140px 闭环反推
-第三层 秩序：分组对齐间距 → 间距三档跟层级树 / 容器阶梯卡>线>留白 / 一页一左轴
+第三层 秩序：分组对齐间距 → 间距三档跟层级树 / 容器阶梯卡>线>留白 / 一页一轴
 ```
 
 **规则全文与机验口径 → [references/layout-rules-v2.md](references/layout-rules-v2.md)（阶段 6 前 MUST 整读全文：禁设行数范围、禁只读小节。阶段 6 除本文 + 槽位路由到的页型文件外，Do NOT 预加载其他 references）**
 
 **焦点与强调判断（层级三问 / 手法八件套 / 视觉重量红线 / 颜色纪律 / 卡片分合）→ [references/focus-judgment.md](references/focus-judgment.md)（阶段 3 焦点定档后、阶段 6 排版时读）**
 
-## 快速上手：四句典型指令
+## 快速上手：两句典型指令
 
-装好后直接说话，不需要记命令。以下是四种最常用的情况：
+装好后直接说话，不需要记命令：
 
 | 你说 | 会发生什么 |
 |---|---|
-| 「帮我做个关于 2026Q3 运营复盘的 PPT，12 页，给管理层看」 | 从零开始：问清配置 → 要素材或自己找 → 优化内容 → 出大纲给你改 → 出 3 套风格预览让你挑 → 生成 → 跑机验 → 交付可放映 HTML |
-| 「这份材料（附 docx/PDF）做成 10 页汇报稿」 | 先提取原文骨架，按你的页数预算重新分页，其余同上。原文事实不改写，只做取舍与标题化 |
-| 「第 3 页太挤了，砍掉一半，别动版式」 | 走改稿轮次：只动指定页，密度降档（砍字不缩字号），改完复跑同页机验 |
-| 「换成深色科技风」 | 只换配色与字体栈（按预设折算 token），结构不动，出预览对比后定稿 |
+| 「帮我做个关于 2026Q3 运营复盘的 PPT，12 页，给管理层看」 | 从零生成：配置 → 素材 → 大纲 → 风格预览 → 生成 → 机验 → 交付 |
+| 「第 3 页太挤了，砍掉一半，别动版式」 | 改稿轮次：只动指定页，砍字不缩字号，改完复跑同页机验 |
 
 **它不会做的事**：不会替你默认选风格，不会跳过确认点自己往下跑，不会用缩小字号的方式硬塞内容，也不会把内容页配图（图片唯一出口是封面）。
 
@@ -63,11 +62,24 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 7. **cut never compress** — 超密度（>200 字/页）砍字或砍页，绝不缩字号硬塞
 8. **机验闭环** — 生成后必跑 measure-layout.js 量版率；不达标回白名单手段调（换纵向/升字号/换轻容器/砍页），**永不加填充物**（60% 反噬史禁令）
 
+## NEVER 速查（改稿轮次只读局部时必扫；散布各节的上下文版保留不动）
+
+- 永不加填充物凑版面率 → 原则 8
+- 超密度砍字砍页，绝不缩字号硬塞 → 原则 7
+- 客户实物永远优先，禁拿库内预设顶替 → 阶段 5
+- 色值只走五件套映射与派生公式，禁自造 → 阶段 6.2
+- 封面装置按新主题推导，禁照搬参考物的主题装置 → 阶段 5
+- 图片唯一出口是封面，内容页禁图 → 5.2
+- 预览=迷你成品，禁手排示意 → 5.1
+- 用装饰的页，内容必须包进 `.content`（漏包=装饰压字）→ 阶段 6.2
+- 趋势/构成/排行数据必图表化，禁排纯数字组 → 阶段 6.6
+- chassis-v2.html 是 build 产物禁手改，改源码必跑 build → 原则 4
+
 ---
 
 ## 工作流程
 
-严格按照以下 **7 个阶段** 顺序执行，每个阶段等待用户确认后再进入下一阶段。
+严格按照以下 **7 个阶段** 顺序执行，每个阶段等待用户确认后再进入下一阶段（阶段 0 为可选前置、6.5 为阶段 6 的机验子步；含交付共 8 个确认停点——「七阶段」是流程名号）。
 
 ### 阶段0：读取项目规则（可选，先于其他阶段）
 
@@ -114,6 +126,14 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 
 ### 阶段5：风格选择
 
+**客户自带风格（2026-10-25 立，优先于下方标准流程）**
+
+- 给了实物（成品 HTML / PPTX / 截图 / 色值）或点名已存自定义预设 → **跳过下方四池提问与风格预览**，直接提取实物**风格配方**采用——不只色板：渐变、封面装置的浓密度与态度、标题用色节奏（双色/字距）、容器浓度（玻璃卡/无盒）一并提取对齐；**装置的具体内容按新主题推导，禁照搬参考物的主题装置**（贴片/柱阵/圆环是上一个主题的隐喻物，跨主题照搬=套模板）。色板缺的角色才走派生公式；交付时亮一句所用配方供核对（1025 实测教训：只提色板=色对魂丢，参考物的丰富度全被底盘默认磨平）
+- 只给了含糊词（如「科技风」）→ 不出文字追问，按词的气质挑 3 套出预览图让客户指认
+- 客户实物永远优先，**禁止拿库内预设顶替**（1025 事故：用户自定义风格被旧入册青族顶替出稿）
+
+无风格指定时，走以下标准流程。
+
 **先读 [references/presets-index.md](references/presets-index.md)（22 套索引+四池路由），再按池/点名到 [references/style-presets.md](references/style-presets.md) Grep 预设名直达对应小节——勿全量读正文（约 1700 行）。** 核心理念：用户只答 1 个问题、看 1 个预览文件；封面布局根据内容自动决定。
 
 #### 5.0 风格选择（1 次提问）
@@ -153,7 +173,7 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 - **预览元信息在卡外**：风格名+气质标签放卡上方、"适合 | 签名 | 避免"放卡下方——不占卡内版面
 - **机验边界**：预览不跑字号类探针（scale 后 getBoundingClientRect 为缩小值，绝对值口径必误报）；全量机验仍在阶段 6.5 对成品跑
 
-浏览器打开预览 → 用户翻页对比 → 4 选 1 提问（三套风格 + D 混搭；宿主有结构化提问就用，否则编号选项）。混搭直接追问具体要求，不再生成预览。**封面默认不问，生成后不满意再改。**
+浏览器打开预览 → 用户翻页对比 → 4 选 1 提问（三套风格 + D 混搭；宿主有结构化提问就用，否则编号选项）。混搭直接追问具体要求，不再生成预览。**封面确认点（2026-10-25 立）：首批生成（封面+前 2 页）后亮封面静帧过目——有异议先改封面再放量，无异议继续；不加新停顿，复用首批分批落盘节奏（1025 实测：封面是审美重灾区，用户对封面主张最强，事后返工成本最高）。**
 
 #### 5.2 图片素材收集（可选 — 仅封面用图）
 
@@ -177,7 +197,7 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 
 1. **底盘**：复制 chassis-v2.html（1920×1080 舞台 + token + 页骨架 + 边注四件套 + 翻页 JS）
 2. **风格映射**：所选预设的色板 → 按 [references/style-presets.md](references/style-presets.md) 顶部《v2 五件套映射表》折算到 chassis 的 `--bg/--ink/--ink-dim/--accent/--hairline`（缺项走派生公式，禁自造色值）；字体按同文件《字体落地表》取**跨平台栈**（顺序固定：预设原名 → 平台替代 Win/macOS 双写 → 通用族兜底；**包内不带任何字体文件，字形随使用者机器**，用户想还原原版就自己装 OFL 字体）（结构永远 v2，颜色跟预设走；入场节奏映射到 `.rv` 的 `--d` 延迟编排——氛围快慢由延迟疏密表达，禁夸张弹跳）
-   **装饰配方映射**：预设/即兴配方 → [references/decoration-vocab.md](references/decoration-vocab.md) 选主签名（≤2 种，全片贯穿：封面浓 `.deco` / 内容页淡 `.deco.dim` / 装置仅首尾 `.deco.soft`）。用装饰的页：slide 首子元素挂 `.deco` 容器，**其余内容全部包进 `.content`**（漏包 = 装饰压字）；不用装饰的页结构照旧。`--warn` 由预设指定（写配色理由）或留空退回 accent；数据汇报型主题封面可启用数字条变体（slide 挂 `.has-metrics` + `.cover-metrics`，三段式铁律见词汇库 §5.3）；封面构图总纲（hook / 装置 / 数字条 / 四步流程）见词汇库 §五
+   **装饰配方映射**：预设/即兴配方 → [references/decoration-vocab.md](references/decoration-vocab.md) 选主签名（默认 ≤2 种；风格配方声明更多时按配方走——如魔鬼绿 4 件：渐变+装置+圆弧+光晕，2026-10-25 松绑；全片贯穿一致性不放松：封面浓 `.deco` / 内容页淡 `.deco.dim` / 装置仅首尾 `.deco.soft`）。用装饰的页：slide 首子元素挂 `.deco` 容器，**其余内容全部包进 `.content`**（漏包 = 装饰压字）；不用装饰的页结构照旧。`--warn` 由预设指定（写配色理由）或留空退回 accent；数据汇报型主题封面可启用数字条变体（slide 挂 `.has-metrics` + `.cover-metrics`，三段式铁律见词汇库 §5.3）；封面构图总纲（hook / 装置 / 数字条 / 四步流程）见词汇库 §五
 3. **逐页生成**：按大纲从 P1 到 PN 顺序，逐页过判定树选槽位（见下）；字号/间距只取 token 档；密度按大纲档位执行（超密度已在大纲砍掉）；**动画按 [references/animation-routing.md](references/animation-routing.md) 自动路由**——按阶段 1 内容侧重 + 阶段 5 氛围查套餐，给元素挂类名即生效（`.rv` 分层入场为默认主力），**不逐个问客户**
 4. **讲稿**：每页 3-5 条提词卡要点（不写逐字稿）写入产物 JS 的 `NOTES` 对象（键=页 id）——S 演讲者模式备注卡读此数据源
 5. **长 deck 分批落盘**（3-4 页/批防爆上下文），静默执行不弹窗
@@ -187,21 +207,21 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 
 ```
 这页内容的逻辑是……
-├─ 围绕论点的论据        → 行组（编号或标记+小标题+正文，无盒）★主力——前缀二选一：序列关系（步骤/排名）→.no 编号，非序列→.sh-mark 标记，禁双前缀（layout-rules §3.2b）
+├─ 围绕论点的论据        → 行组（编号或标记+小标题+正文，无盒）★主力——前缀二选一：序列关系（步骤/排名）→.no 编号，非序列→.sh-mark 标记，禁双前缀（layout-rules §3.2b）；**步骤序列升格判断（1025 庆哥立）：内容量多且层级分明＋组间信息量接近＋版率饱和不显空，三者同满足 → 升格步骤卡**——卡不卡看内容性质，不看组数配额
 ├─ 二维对比              → 双栏对比（中缝发丝线，非卡片）
 ├─ 单个关键数字          → 焦点数字（一页一个，主从纵排：数字上说明下贴身）
 ├─ 量值并列（2-4 指标）  → metric 发丝线组（等宽栏，每栏实内容）
 ├─ 趋势/时序数据         → 【图表】折线/柱状——禁排纯数字组
 ├─ 构成/占比数据         → 【图表】堆叠条/环状，或 CSS 占比条
 ├─ 排行对比              → 【图表】横向条形（长度=值，数字右对齐）
-├─ 过程/机制/流向        → 三问闸门（[anim-recipes](references/anim-recipes.md)§一）：全过且配额内 → 代码动画；否则 → 图示（[diagram-patterns](references/diagram-patterns.md)）
+├─ 过程/机制/流向        → 三问闸门（[anim-recipes](references/anim-recipes.md)§一）：全过且配额内 → 代码动画；否则 → 图示（[diagram-patterns](references/diagram-patterns.md) 基线参考；介质开放：CSS 组合块优先，SVG 仅精确绘制）
 └─ 表格数据              → 表格（数字列 tabular-nums）
 ```
 
-- 卡片默认无盒：出卡必须自证属于四场景之一——身份独立并列块 / 引用切出 / 选择性突出 / 异构视觉单元并列（穷举+配额 → focus-judgment §二「结构辅助·卡片四场景」），说不出=撤盒；形态默认顶线卡（底盘 `.card` 三段式，多卡 `.card-row` 锁等宽等高），盒装 `.card-box` 仅品牌预设点名，≤3 张
+- 卡片由场合判断（2026-10-25 松绑，原配额管制致版面单调）：命中四场景（身份独立并列块 / 引用切出 / 选择性突出 / 异构视觉单元并列 → focus-judgment §二「结构辅助·卡片四场景」）即出卡，数量跟内容组数走、不设硬上限；连续叙事、行组够用的场合不出卡。形态跟随风格配方（纸感→顶线卡 `card` 三段式、黑底科技→玻璃淡卡、品牌预设点名→盒装 `card-box`），多卡 `.card-row` 锁等宽等高，全片形态唯一
 - 主从二式：从属轻（单行，高度比 <0.3）纵排贴身；从属重（3-4 行，0.5-1）横排两翼
 - 压轴行两形态：金句级 32px/600/左轴；普通收束 16px 灰；内容定形态
-- 可忽略信息（来源/备注/页码）→ 角落位，退出内容轴
+- 可忽略信息（来源/备注/页码/落款）→ 角落位，退出内容轴
 - 数字排版全规则 → [references/number-typography.md](references/number-typography.md)（判位三分/三模式/大而重大而轻）
 
 #### 阶段 6.5：机验（必跑）
@@ -209,21 +229,10 @@ description_en: A single-file HTML deck generator for projection-grade presentat
 - `scripts/measure-layout.js` 版率口径（探针强制可见防动画骗检、剔除边注四件套；已兼容 `.reveal` 系入场类，测任意外部产物同样适用；**装饰层 `.deco` 双口径排除**——装饰参与构图但版率不算数）+ **欠填口径 vacMax/vacBottom**（页高 10 带垂直占空：文本叶子+img/canvas/svg；**vacBottom≥4（底 40% 空）→ 先查页型**——密排/双栏页=欠填回白名单手段调，单焦点页（金句/焦点数字/封面）豁免（§1.4 留白配主角）；只提示不 FAIL（阈值人判）→ layout-rules §1.2b）
 - `python scripts/crowd-probe.py <产物.html 绝对路径>` 拥挤探针（相对路径会 ERR_FILE_NOT_FOUND）：组内间距 <14px 贴死 / 文字重叠 / 正文级行高 <1.25——"行组内标题贴正文"类事故的专项机验（需 playwright + 系统 Chrome；缺 playwright 时打印 `[SKIP]` 跳过，不算产物问题；禁临时安装；跑不了须在交付说明里注明"这一关未验"）
 
-**measure-layout 跑法（浏览器注入型：直跑 node 会 window 未定义）**：
+**measure-layout 跑法**（注入型，直跑 node 会 window 未定义）：三步 PowerShell（注入探针→headless 渲染→读 REPORT:: 行）→ 真源 [references/layout-rules-v2.md](references/layout-rules-v2.md)《附：measure-layout 跑法》；Chrome 路径解析 → [references/offline-export.md](references/offline-export.md)
 
-```powershell
-# ① 注入探针到最后一个 </body> 前（禁 replace 首匹配：演讲者窗口模板里有字面量 '</body>'）
-$deck = Get-Content -Raw -Encoding UTF8 产物.html
-$i = $deck.LastIndexOf('</body>'); $probe = Get-Content -Raw -Encoding UTF8 scripts\measure-layout.js
-[IO.File]::WriteAllText("$PWD\产物.probe.html", $deck.Substring(0,$i) + "<script>`n" + $probe + "`n</script>`n" + $deck.Substring($i), (New-Object Text.UTF8Encoding($false)))
-# ② 渲染抓报告（Chrome 不在 PATH 时用 %LOCALAPPDATA% 绝对路径，见交付节）
-& chrome --headless=new --disable-gpu --allow-file-access-from-files --user-data-dir="$env:TEMP\chrome-probe" --virtual-time-budget=20000 --dump-dom "file:///$(($PWD.Path + '\产物.probe.html') -replace '\\','/')" | Out-File dump.txt -Encoding UTF8
-# ③ 读数：每页一行 titleBox / contentBox area / vacMax / vacBottom
-Select-String -Path dump.txt -Pattern 'REPORT::'
-```
-
-- 断言 349 验收清单（number-typography R5）
-- `python scripts/verify-consistency.py <产物>` 静态一致性断言（纯 Python 零依赖）。**单一报告制**：脚本只出问题清单、不做交付裁决——[严重] = 骨架完整性（S1-S8 + 348/349）/ 孤儿组件类 / 强调容器形态数（>6 种）/ 缺 hl 卡片（>5 个）/ 内联字号 <11.5px（>10 处）/ 页间竖间距（>2 种；仅当生成端写了内联 gap 时生效，否则显示「统一」）/ 光晕配色 bug / 字号类变量悬空 / 封面标题字号覆盖 / 封面断言（视觉事件三选一——stamp 级数字 / .has-metrics+.cover-metrics / `.dv-` 装置标记，全缺 = 平庸封面；装饰词条对底色有效对比度 <1.1:1 = 隐身，仅当 deck 实际用了 `.deco` 对应词条才判；`.deco` 直接子元素 >2 件）/ 图表与图示规范 / 口径自洽，命中即 exit 1（=打回信号，逐项处理或说明理由后交付）；[提示] = 内联硬编码色、辅助色 tone、单列纵排、图示节点上限（D-3）、封面焦点让位梯度 / 巨型数字口径注缺失，以及上述「越线项未越线时」的计数提醒。处理决定权在生成端与使用者（旧 FAIL/HINT 两级裁决已降为信息分级，不再写任何计数文件）
+- 数字排版验收清单（number-typography.md R5 的断言清单）
+- `python scripts/verify-consistency.py <产物>` 静态一致性断言（纯 Python 零依赖）。**单一报告制**：脚本只出问题清单、不做交付裁决——[严重] = 骨架完整性（S1-S8=骨架八断言组、348/349=数字排版断言，编号定义见脚本内注释）/ 孤儿组件类 / 强调容器形态数（>6 种）/ 缺 hl 卡片（>5 个）/ 内联字号 <11.5px（>10 处）/ 页间竖间距（>2 种；仅当生成端写了内联 gap 时生效，否则显示「统一」）/ 光晕配色 bug / 字号类变量悬空 / 封面标题字号覆盖 / 封面断言（视觉事件三选一——stamp 级数字 / .has-metrics+.cover-metrics / `.dv-` 装置标记，全缺 = 平庸封面；装饰词条对底色有效对比度 <1.1:1 = 隐身，仅当 deck 实际用了 `.deco` 对应词条才判；`.deco` 直接子元素 >2 件）/ 图表与图示规范 / 口径自洽，命中即 exit 1（=打回信号，逐项处理或说明理由后交付）；[提示] = 内联硬编码色、辅助色 tone、单列纵排、图示节点上限（D-3）、封面焦点让位梯度 / 巨型数字口径注缺失，以及上述「越线项未越线时」的计数提醒。处理决定权在生成端与使用者（旧 FAIL/HINT 两级裁决已降为信息分级，不再写任何计数文件）
 - `python scripts/check-deck.py <产物>` 同类错误全扫（四类：hero-num 单位灰 / SVG 着色 / 文本 y 越界 / **字号档位**——合法档位 = 底盘内容层实有档位**自动提取** ∪ `var(--fs-*)` token ∪ 规则批准档位，改底盘加档白名单自动跟，无手工同步）——改稿轮次与交付前各跑一次；档位外的字号一律报，先判断是底盘漏搬还是规则漏收，不要为了过检删规则（同类错误全扫制的机验落点）
 - **两套字号地板并存，别混用**：`22px` 是**设计地板**（正文级实际字号，排版规则，见 layout-rules-v2 §2.1）；机验里的 `11.5px` 是**内联覆盖地板**（只查 `style` 内联 `font-size`，防规则段漏搬）。11.5–22px 之间属「机验不管、靠人眼与 §2.1 兜」的灰区，交付前需自行用 measure-layout 复核
 - 不达标回白名单手段调（换纵向/升字号/换轻容器/砍页），永不加填充物
@@ -232,15 +241,7 @@ Select-String -Path dump.txt -Pattern 'REPORT::'
 
 完成后自动打开完整 HTML（一次），聊天内附首屏截图作补充预览。
 
-**Chrome 路径解析（Windows 常不在 PATH）**：先试 `chrome`；失败依次试 `%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe`、`%ProgramFiles%\Google\Chrome\Application\chrome.exe`、`%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe`。本机实测 Chrome 在 `%LOCALAPPDATA%`。
-
-**PDF 导出（双出口）**：交付时问用户"要不要 PDF 版"；用户页面内也可按 **P 键**随时打印。导出命令（系统 Chrome，零依赖秒出；**headless 验证一律加独立 `--user-data-dir`**，否则会占用默认实例导致交付 `start` 不弹窗）：
-
-```
-chrome --headless=new --user-data-dir="%TEMP%\chrome-pdf-profile" --no-pdf-header-footer --virtual-time-budget=6000 --print-to-pdf="输出.pdf" "file:///绝对路径.html"
-```
-
-（virtual-time 预算让数字滚动跑完再落纸；print CSS 已锁每页 16:9 零边距、chrome 全退出、动画定格终值——底盘自带，无需额外处理）
+**PDF 导出（双出口）**：交付时问用户"要不要 PDF 版"；用户页面内也可按 **P 键**随时打印。导出命令、Chrome 路径解析（Windows 常不在 PATH）、headless 注意事项（独立 `--user-data-dir`）→ 真源 [references/offline-export.md](references/offline-export.md)。
 
 ---
 

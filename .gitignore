@@ -27,3 +27,6 @@ desktop.ini
 .idea/
 *.swp
 *~
+
+# 过程备份（包内留档，禁入版本库与分发包）
+.backups/

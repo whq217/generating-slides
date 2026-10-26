@@ -169,3 +169,18 @@
 - **上游**：底盘思路与部分风格体系继承自 [Frontend Slides](https://github.com/zarazhangrui/frontend-slides)（MIT，声明见 SKILL.md 文末《来源与许可》）——8-Bit Orbit / Broadside / Capsule 三套预设由该库移植，卡片形态 R1/R2/R3 由其蒸馏而来。v2 范式（三层规则 + 七阶段 + 机验闭环）为本包重写。
 - **下游**：产出是单文件 HTML，任何静态托管或本地双击即可放映，不反向依赖本包；改稿只动产物，不动底盘源码。
 - **与枚举式禁令清单的区别**：三层是推导链（版面率第一性 → 推出字号 → 推出秩序，每条规则可回溯上层原理），配 token 强制与闭环机验（§1.2 版率口径）双保险；枚举清单只枚举症状，覆盖有洞、无推导链可校，且不测欠填。
+
+---
+
+## 附：measure-layout 跑法（浏览器注入型，直跑 node 会 window 未定义；2026-10-26 自 SKILL.md 下沉）
+
+```powershell
+# ① 注入探针到最后一个 </body> 前（禁 replace 首匹配：演讲者窗口模板里有字面量 '</body>'）
+$deck = Get-Content -Raw -Encoding UTF8 产物.html
+$i = $deck.LastIndexOf('</body>'); $probe = Get-Content -Raw -Encoding UTF8 scripts\measure-layout.js
+[IO.File]::WriteAllText("$PWD\产物.probe.html", $deck.Substring(0,$i) + "<script>`n" + $probe + "`n</script>`n" + $deck.Substring($i), (New-Object Text.UTF8Encoding($false)))
+# ② 渲染抓报告（Chrome 不在 PATH 时按 offline-export.md §Chrome 路径解析取绝对路径）
+& chrome --headless=new --disable-gpu --allow-file-access-from-files --user-data-dir="$env:TEMP\chrome-probe" --virtual-time-budget=20000 --dump-dom "file:///$(($PWD.Path + '\产物.probe.html') -replace '\\','/')" | Out-File dump.txt -Encoding UTF8
+# ③ 读数：每页一行 titleBox / contentBox area / vacMax / vacBottom
+Select-String -Path dump.txt -Pattern 'REPORT::'
+```

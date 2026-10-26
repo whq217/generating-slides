@@ -53,7 +53,7 @@ EXCLUDE_FILES = {
     ".gitignore",
     "README_en.md",      # 英文说明只服务 GitHub 访客
 }
-EXCLUDE_DIRS = {".git", "tools", "__pycache__", ".idea", ".vscode", ".pytest_cache"}
+EXCLUDE_DIRS = {".git", "tools", "bad", "samples", "__pycache__", ".idea", ".vscode", ".pytest_cache"}
 EXCLUDE_EXT = {".pyc", ".pyo", ".orig", ".rej", ".swp", ".tmp", ".log"}
 EXCLUDE_NAMES = {".DS_Store", "Thumbs.db"}
 
@@ -78,7 +78,7 @@ LICENSE_PLATFORM = """MIT License。本包经技能市场分发，不随包附�
 
 # 目录树里需要整行（或整棵子树）去掉的条目
 TREE_DROP_FILES = {"LICENSE", "NOTICE", ".gitattributes", ".gitignore", "README_en.md"}
-TREE_DROP_DIRS = {"tools"}
+TREE_DROP_DIRS = {"tools", "samples"}
 
 
 def read_version(root):
@@ -186,6 +186,23 @@ def rewrite_readme(text):
             skipping = False
         out.append(ln)
     lines = out
+
+    # 4b) 去掉「维护者与二次开发」整节（含机验 / 真源地图 / 包内结构三小节）
+    #     平台包已剥离 samples/ 与 tools/，这三节引用的都是仓库侧资产，对终端用户无意义
+    _blob = "\n".join(lines)
+    _pat_maint = re.compile(r"^## 维护者与二次开发\s*$.*?(?=^## |\Z)", re.S | re.M)
+    if _pat_maint.search(_blob):
+        lines = _pat_maint.sub("", _blob, count=1).splitlines()
+        ops.append("README: 去掉「维护者与二次开发」整节")
+
+    # 4c) 去掉「与 v1 的关系」节
+    #     平台侧从首版（1.0.0）起就是 v2 内核，用户从未见过 v1；该节的「不删除」说的是仓库标签行为，
+    #     包内既无 v1 也无从验证——属跨载体残留，不随包分发
+    _blob = "\n".join(lines)
+    _pat_v1 = re.compile(r"^## 与 v1 的关系\s*$.*?(?=^## |\Z)", re.S | re.M)
+    if _pat_v1.search(_blob):
+        lines = _pat_v1.sub("", _blob, count=1).splitlines()
+        ops.append("README: 去掉「与 v1 的关系」节（平台侧无 v1）")
 
     # 5) 按节重写「安装」与「许可证」
     text = "\n".join(lines) + "\n"
