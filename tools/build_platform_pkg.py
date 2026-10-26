@@ -53,8 +53,8 @@ EXCLUDE_FILES = {
     ".gitignore",
     "README_en.md",      # 英文说明只服务 GitHub 访客
 }
-EXCLUDE_DIRS = {".git", "tools", "bad", "samples", "__pycache__", ".idea", ".vscode", ".pytest_cache"}
-EXCLUDE_EXT = {".pyc", ".pyo", ".orig", ".rej", ".swp", ".tmp", ".log"}
+EXCLUDE_DIRS = {".git", "tools", "bad", "samples", "__pycache__", ".idea", ".vscode", ".pytest_cache", ".backups"}
+EXCLUDE_EXT = {".pyc", ".pyo", ".orig", ".rej", ".swp", ".tmp", ".log", ".bak"}
 EXCLUDE_NAMES = {".DS_Store", "Thumbs.db"}
 
 # ── README 两节按渠道重写的模板 ───────────────────────────────────────────
